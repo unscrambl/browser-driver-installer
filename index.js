@@ -10,8 +10,3 @@ program
     .parse(process.argv);
 
 driverInstaller(program.chromeVersion, program.chromeDriverTargetPath, program.firefoxVersion, program.firefoxDriverTargetPath);
-
-/*
-node index.js --chrome-version 67 --chrome-driver-target-path output/chromeDriver
-node index.js --firefox-version 55 --firefox-driver-target-path output/geckoDriver
-*/
