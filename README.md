@@ -5,7 +5,7 @@ Installs Chrome and Gecko drivers that match with the specified browser versions
 
 #### Usage:
 
-**Post Install Script:** If your environment has the `CHROME_VERSION`, `CHROMEDRIVER_PATH`, `FIREFOX_VERSION`, `GECKODRIVER_PATH` variables defined, a post-install script will download the `ChromeDriver` and `GeckoDriver` executables to the specified paths automatically. 
+**Post Install Script:** If your environment has the `BROWSER_DRIVER_INSTALLER_CHROME_VERSION`, `BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH`, `BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION`, `BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH` variables defined, a post-install script will download the `ChromeDriver` and `GeckoDriver` executables to the specified paths automatically. 
 
 
 **As a module:**
