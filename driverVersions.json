@@ -20,7 +20,7 @@
             "driverNPMPackageVersion": "2.29.0",
             "driverVersion": "2.29"
         },
-        "59": { 
+        "59": {
             "driverNPMPackageVersion": "2.30.0",
             "driverVersion": "2.30"
         },
@@ -58,23 +58,23 @@
         }
     },
     "geckoDriverVersions": {
-        "55":{
+        "55": {
             "driverNPMPackageVersion": "1.10.0",
             "driverVersion": "0.19.1"
         },
-        "56":{
+        "56": {
             "driverNPMPackageVersion": "1.10.0",
             "driverVersion": "0.19.1"
         },
-        "57":{
+        "57": {
             "driverNPMPackageVersion": "1.10.0",
             "driverVersion": "0.19.1"
         },
-        "58":{
+        "58": {
             "driverNPMPackageVersion": "1.10.0",
             "driverVersion": "0.19.1"
         },
-        "59":{
+        "59": {
             "driverNPMPackageVersion": "1.11.0",
             "driverVersion": "0.20.1"
         }

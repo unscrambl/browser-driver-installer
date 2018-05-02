@@ -1,18 +1,18 @@
 {
-  "bin": {
-    "browserDriverInstaller": "./index.js"
-  },
-  "name": "browser-driver-installer",
-  "version": "0.0.1",
-  "description": "Installs Chrome and Gecko drivers that matches with the specified browser versions",
-  "main": "index.js",
-  "dependencies": {
-    "commander": "2.15.1",
-    "shelljs": "0.8.1"
-  },
-  "scripts": {
-    "postinstall": "node ./index.js --chrome-version $CHROME_VERSION --chrome-driver-target-path $CHROMEDRIVER_PATH --firefox-version $FIREFOX_VERSION --firefox-driver-target-path $GECKODRIVER_PATH"
-  },
-  "author": "Unscrambl",
-  "license": "Apache-2.0"
+    "author": "Unscrambl",
+    "bin": {
+        "browserDriverInstaller": "./index.js"
+    },
+    "dependencies": {
+        "commander": "2.15.1",
+        "shelljs": "0.8.1"
+    },
+    "description": "Installs Chrome and Gecko drivers that matches with the specified browser versions",
+    "license": "Apache-2.0",
+    "main": "index.js",
+    "name": "browser-driver-installer",
+    "scripts": {
+        "postinstall": "node ./index.js --chrome-version $CHROME_VERSION --chrome-driver-target-path $CHROMEDRIVER_PATH --firefox-version $FIREFOX_VERSION --firefox-driver-target-path $GECKODRIVER_PATH"
+    },
+    "version": "0.0.1"
 }
