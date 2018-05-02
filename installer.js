@@ -1,10 +1,10 @@
 'use strict';
 /* eslint-disable no-console */
 
-var runNpmChildProcess = require('./runNpmChildProcess');
-var path = require('path');
-var execSync = require('child_process').execSync;
-var shell = require('shelljs');
+const runNpmChildProcess = require('./runNpmChildProcess');
+const path = require('path');
+const execSync = require('child_process').execSync;
+const shell = require('shelljs');
 
 const TEMP_DIR = 'temp';
 const CHROME_DRIVER_NAME = 'chromedriver';
@@ -19,22 +19,25 @@ function installDriverWithVersion(driverName, driverBinPath, installPath, versio
 {
     if (checkDirectoryAndVersion(driverName, installPath, versionObject.driverVersion))
     {
-        return;
+        return false;
     }
 
     shell.mkdir('-p', TEMP_DIR);
 
-    runNpmChildProcess(['install', `${driverName}@${versionObject.driverNPMPackageVersion}`, '--prefix', TEMP_DIR]).then(
+    return runNpmChildProcess(['install', `${driverName}@${versionObject.driverNPMPackageVersion}`, '--prefix',
+        TEMP_DIR
+    ]).then(
         function ()
         {
             shell.mkdir('-p', installPath);
-            console.log('package dependencies have been installed');
             shell.cp('-n', path.join(TEMP_DIR, driverBinPath), installPath);
             shell.rm('-rf', TEMP_DIR);
+            console.log('package dependencies have been installed');
+            return true;
         },
         function (e)
         {
-            console.log('package dependencies installation failed with error, details: ' + e.toString());
+            throw new Error('package dependencies installation failed with error, details: ' + e.toString());
         });
 }
 
@@ -102,32 +105,43 @@ function driverInstaller(detectedChromeVersion, chromeDriverTargetPath, detected
 
     if (detectedChromeVersion && !chromeDriverVersions[detectedChromeVersion])
     {
-        console.log(
+        throw new Error(
             `Failed to locate a version of ChromeDriver that matches the installed version of Chrome (${detectedChromeVersion}). Valid Chrome versions are: ${Object.keys(chromeDriverVersions).join(', ')}`
         );
     }
-    else if (detectedChromeVersion)
+    else if (detectedChromeVersion && typeof (chromeDriverTargetPath) === 'string')
     {
-        installDriverWithVersion(CHROME_DRIVER_NAME, CHROME_DRIVER_BIN_PATH, chromeDriverTargetPath,
+        return installDriverWithVersion(CHROME_DRIVER_NAME, CHROME_DRIVER_BIN_PATH, chromeDriverTargetPath,
             chromeDriverVersions[detectedChromeVersion]);
+    }
+    else
+    {
+        console.log('No Chrome version or target path is provided. Skipping...');
     }
 
     if (detectedFirefoxVersion && !geckoDriverVersions[detectedFirefoxVersion])
     {
-        console.log(
+        throw new Error(
             `Failed to locate a version of GeckoDriver that matches the installed version of Firefox (${detectedFirefoxVersion}). Valid Firefox versions are: ${Object.keys(geckoDriverVersions).join(', ')}`
         );
     }
-    else if (detectedFirefoxVersion)
+    else if (detectedFirefoxVersion && (typeof geckoDriverTargetPath) === 'string')
     {
-        installDriverWithVersion(GECKO_DRIVER_NAME, GECKO_DRIVER_BIN_PATH, geckoDriverTargetPath, geckoDriverVersions[
-            detectedFirefoxVersion]);
+        return installDriverWithVersion(GECKO_DRIVER_NAME, GECKO_DRIVER_BIN_PATH, geckoDriverTargetPath,
+            geckoDriverVersions[
+                detectedFirefoxVersion]);
     }
+    else
+    {
+        console.log('No Firefox version or target path is provided. Skipping...');
+    }
+
+    return false;
 }
 
 function majorBrowserVersion(browserVersionString)
 {
-    return browserVersionString && browserVersionString.match(BROWSER_MAJOR_VERSION_REGEX)[0];
+    return (typeof browserVersionString) === 'string' && browserVersionString.match(BROWSER_MAJOR_VERSION_REGEX)[0];
 }
 
 module.exports.driverInstaller = driverInstaller;
