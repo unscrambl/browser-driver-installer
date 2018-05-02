@@ -9,7 +9,8 @@ module.exports = runNpmChildProcess;
 function runNpmChildProcess(args, cachePath)
 {
     args.push('--cache-min=600000', '--no-optional', '--loglevel=error');
-    if(cachePath){
+    if (cachePath)
+    {
         args.push('--cache=' + cachePath);
     }
     return retryNpmProcessIfItFails(args, MAX_RETRY_COUNT);
