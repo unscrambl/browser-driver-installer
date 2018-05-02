@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/unscrambl/browser-driver-installer.svg?branch=master)](https://travis-ci.org/unscrambl/browser-driver-installer)
 
 # browser-driver-installer
-Installs Chrome and Gecko drivers that match with the specified browser versions.
+Installs Chrome and Gecko drivers that match with the specified browser versions. It uses the [chromedriver](https://www.npmjs.com/package/chromedriver) and [geckodriver](https://www.npmjs.com/package/geckodriver) NPM packages to download the drivers. 
 
 #### Usage:
 
