@@ -11,22 +11,21 @@ Installs Chrome and Gecko drivers that match with the specified browser versions
 **As a module:**
 ```
 const driverInstaller = require('browser-driver-installer').driverInstaller;
-driverInstaller(CHROME_VERSION, CHROMEDRIVER_TARGET_PATH, FIREFOX_VERSION, GECKODRIVER_TARGET_PATH);
+driverInstaller(BROWSER_NAME, BROWSER_VERSION, TARGET_PATH);
 ```
 
 
 **CLI Usage:**
 
 ````
-Usage: index [options]
+ Usage: index [options]
 
   Options:
 
-    --chrome-version [chromeVersion]                        Chrome browser major version string e.g. 65
-    --chrome-driver-target-path [chromeDriverTargetPath]    Path to install Chrome driver executable
-    --firefox-version [firefoxVersion]                      Firefox browser major version string e.g. 57
-    --firefox-driver-target-path [firefoxDriverTargetPath]  Path to install Firefox driver(geckoDriver) executable
-    -h, --help                                              output usage information
+    --browser-name <browserName>        Browser to install the driver for
+    --browser-version <browserVersion>  Browser version string e.g. 65, 67.0.23
+    --target-path <targetPath>          Path to install driver executable
+    -h, --help                          output usage information
 ````
 
 ## LICENSE
