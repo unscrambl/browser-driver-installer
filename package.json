@@ -22,5 +22,5 @@
         "postinstall": "npm run install-chromedriver && npm run install-geckodriver",
         "test": "node_modules/mocha/bin/mocha *.spec.js"
     },
-    "version": "1.0.1"
+    "version": "1.0.2"
 }
