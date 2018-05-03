@@ -96,6 +96,10 @@ function driverVersionString(driverName, targetPath)
 
 function driverInstaller(browserName, browserVersion, targetPath)
 {
+    if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
+    {
+        throw new Error('Parameters are not valid strings.');
+    }
     // GeckoDriver NPM package versions are defined according to https://github.com/mozilla/geckodriver/releases
     // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
     const browserVersionsObject = JSON.parse(shell.cat(path.resolve(__dirname, 'driverVersions.json')));
