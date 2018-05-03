@@ -15,9 +15,10 @@
     "license": "Apache-2.0",
     "main": "index.js",
     "name": "browser-driver-installer",
+    "repository": "github:unscrambl/browser-driver-installer",
     "scripts": {
-        "postinstall": "node ./index.js --chrome-version $CHROME_VERSION --chrome-driver-target-path $CHROMEDRIVER_PATH --firefox-version $FIREFOX_VERSION --firefox-driver-target-path $GECKODRIVER_PATH",
+        "postinstall": "./postinstall",
         "test": "node_modules/mocha/bin/mocha *.spec.js"
     },
-    "version": "0.0.1"
+    "version": "1.0.4"
 }

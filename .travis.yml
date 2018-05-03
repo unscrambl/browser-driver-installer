@@ -1,3 +1,9 @@
 language: node_js
 node_js: 
   - "node"
+env: 
+  global: 
+    - BROWSER_DRIVER_INSTALLER_CHROME_VERSION=67
+    - BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH=./output/chromedriver
+    - BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION=57
+    - BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH=./output/geckodriver
