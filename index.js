@@ -6,14 +6,12 @@ const driverInstaller = require('./installer').driverInstaller;
 if (require.main === module)
 {
     program
-        .option('--chrome-version [chromeVersion]', 'Chrome browser major version string e.g. 65')
-        .option('--chrome-driver-target-path [chromeDriverTargetPath]', 'Path to install Chrome driver executable')
-        .option('--firefox-version [firefoxVersion]', 'Firefox browser major version string e.g. 57')
-        .option('--firefox-driver-target-path [firefoxDriverTargetPath]',
-            'Path to install Firefox driver(geckoDriver) executable')
+        .option('--browser-name <browserName>', 'Browser to install the driver for')
+        .option('--browser-version <browserVersion>', 'Browser version string e.g. 65, 67.0.23')
+        .option('--target-path <targetPath>', 'Path to install driver executable')
         .parse(process.argv);
 
-    driverInstaller(program.chromeVersion, program.chromeDriverTargetPath, program.firefoxVersion, program.firefoxDriverTargetPath);
+    driverInstaller(program.browserName, program.browserVersion, program.targetPath);
 }
 else
 {

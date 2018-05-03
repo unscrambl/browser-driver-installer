@@ -6,18 +6,21 @@ const path = require('path');
 const execSync = require('child_process').execSync;
 const shell = require('shelljs');
 
-const TEMP_DIR = 'temp';
+const BROWSER_MAJOR_VERSION_REGEX = new RegExp(/^(\d+)/);
+const CHROME_BROWSER_NAME = 'chrome';
 const CHROME_DRIVER_NAME = 'chromedriver';
 const CHROME_DRIVER_BIN_PATH = path.join('node_modules', 'chromedriver', 'lib', 'chromedriver', CHROME_DRIVER_NAME);
 const CHROME_DRIVER_VERSION_REGEX = new RegExp(/\w+ ([0-9]+.[0-9]+).+/);
 const GECKO_DRIVER_NAME = 'geckodriver';
 const GECKO_DRIVER_BIN_PATH = path.join('node_modules', 'geckodriver', GECKO_DRIVER_NAME);
 const GECKO_DRIVER_VERSION_REGEX = new RegExp(/\w+\s(\d+.\d+.\d+)/);
-const BROWSER_MAJOR_VERSION_REGEX = new RegExp(/^(\d+)/);
+const FIREFOX_BROWSER_NAME = 'firefox';
+const TEMP_DIR = 'temp';
+const VALID_BROWSER_NAMES = [CHROME_BROWSER_NAME, FIREFOX_BROWSER_NAME];
 
-function installDriverWithVersion(driverName, driverBinPath, installPath, versionObject)
+function installDriverWithVersion(driverName, driverBinPath, targetPath, versionObject)
 {
-    if (checkDirectoryAndVersion(driverName, installPath, versionObject.driverVersion))
+    if (checkDirectoryAndVersion(driverName, targetPath, versionObject.driverVersion))
     {
         return false;
     }
@@ -29,8 +32,8 @@ function installDriverWithVersion(driverName, driverBinPath, installPath, versio
     ]).then(
         function ()
         {
-            shell.mkdir('-p', installPath);
-            shell.cp('-n', path.join(TEMP_DIR, driverBinPath), installPath);
+            shell.mkdir('-p', targetPath);
+            shell.cp('-n', path.join(TEMP_DIR, driverBinPath), targetPath);
             shell.rm('-rf', TEMP_DIR);
             console.log('package dependencies have been installed');
             return true;
@@ -41,30 +44,30 @@ function installDriverWithVersion(driverName, driverBinPath, installPath, versio
         });
 }
 
-function checkDirectoryAndVersion(driverName, installPath, driverExpectedVersion)
+function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
 {
-    if (!shell.test('-e', installPath))
+    if (!shell.test('-e', targetPath))
     {
         return false;
     }
-    console.log(`Directory '${installPath}' does exist.`);
+    console.log(`Directory '${targetPath}' does exist.`);
     console.log(`Checking if the directory contains a ${driverName}...`);
 
-    if (!shell.test('-e', path.join(installPath, driverName)))
+    if (!shell.test('-e', path.join(targetPath, driverName)))
     {
-        console.log(`Could not find the ${driverName} in the directory '${installPath}'. Attempting to install it...`);
+        console.log(`Could not find the ${driverName} in the directory '${targetPath}'. Attempting to install it...`);
         return false;
     }
 
     console.log(`${driverName} found.`);
-    const driverMajorVersion = driverVersionString(driverName, installPath);
+    const driverMajorVersion = driverVersionString(driverName, targetPath);
     if (driverMajorVersion !== driverExpectedVersion)
     {
         console.log(
             `${driverName} expected version (${driverExpectedVersion}) does not match with the installed version (${driverMajorVersion}).`
         );
         console.log('Removing the old version...');
-        shell.rm(path.join(installPath, driverName));
+        shell.rm(path.join(targetPath, driverName));
         return false;
     }
 
@@ -72,17 +75,17 @@ function checkDirectoryAndVersion(driverName, installPath, driverExpectedVersion
     return true;
 }
 
-function driverVersionString(driverName, installPath)
+function driverVersionString(driverName, targetPath)
 {
     let versionOutput = null;
     if (driverName === CHROME_DRIVER_NAME)
     {
-        versionOutput = execSync(path.join(installPath, driverName) + ' -v').toString();
+        versionOutput = execSync(path.join(targetPath, driverName) + ' -v').toString();
         return versionOutput.match(CHROME_DRIVER_VERSION_REGEX)[1];
     }
     else if (driverName === GECKO_DRIVER_NAME)
     {
-        versionOutput = execSync(path.join(installPath, driverName) + ' -V').toString();
+        versionOutput = execSync(path.join(targetPath, driverName) + ' -V').toString();
         return versionOutput.match(GECKO_DRIVER_VERSION_REGEX)[1];
     }
     else
@@ -91,52 +94,45 @@ function driverVersionString(driverName, installPath)
     }
 }
 
-function driverInstaller(detectedChromeVersion, chromeDriverTargetPath, detectedFirefoxVersion, geckoDriverTargetPath)
+function driverInstaller(browserName, browserVersion, targetPath)
 {
-    const browserVersionsObject = JSON.parse(shell.cat(path.resolve(__dirname, 'driverVersions.json')));
-    // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
-    const chromeDriverVersions = browserVersionsObject.chromeDriverVersions;
-
     // GeckoDriver NPM package versions are defined according to https://github.com/mozilla/geckodriver/releases
-    const geckoDriverVersions = browserVersionsObject.geckoDriverVersions;
+    // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
+    const browserVersionsObject = JSON.parse(shell.cat(path.resolve(__dirname, 'driverVersions.json')));
 
-    detectedChromeVersion = majorBrowserVersion(detectedChromeVersion);
-    detectedFirefoxVersion = majorBrowserVersion(detectedFirefoxVersion);
+    let browserDriverVersions = null;
+    let driverBinPath = null;
+    let driverName = null;
 
-    if (detectedChromeVersion && !chromeDriverVersions[detectedChromeVersion])
+    if (browserName.toLowerCase() === CHROME_BROWSER_NAME)
     {
-        throw new Error(
-            `Failed to locate a version of ChromeDriver that matches the installed version of Chrome (${detectedChromeVersion}). Valid Chrome versions are: ${Object.keys(chromeDriverVersions).join(', ')}`
-        );
+        browserDriverVersions = browserVersionsObject.chromeDriverVersions;
+        driverBinPath = CHROME_DRIVER_BIN_PATH;
+        driverName = CHROME_DRIVER_NAME;
     }
-    else if (detectedChromeVersion && typeof (chromeDriverTargetPath) === 'string')
+    else if (browserName.toLowerCase() === FIREFOX_BROWSER_NAME)
     {
-        return installDriverWithVersion(CHROME_DRIVER_NAME, CHROME_DRIVER_BIN_PATH, chromeDriverTargetPath,
-            chromeDriverVersions[detectedChromeVersion]);
+        browserDriverVersions = browserVersionsObject.geckoDriverVersions;
+        driverBinPath = GECKO_DRIVER_BIN_PATH;
+        driverName = GECKO_DRIVER_NAME;
     }
     else
     {
-        console.log('No Chrome version or target path is provided. Skipping...');
-    }
-
-    if (detectedFirefoxVersion && !geckoDriverVersions[detectedFirefoxVersion])
-    {
         throw new Error(
-            `Failed to locate a version of GeckoDriver that matches the installed version of Firefox (${detectedFirefoxVersion}). Valid Firefox versions are: ${Object.keys(geckoDriverVersions).join(', ')}`
+            `Browser name "${browserName}" is not a valid browser name. Valid browser names are: ${(VALID_BROWSER_NAMES).join(', ')}`
         );
     }
-    else if (detectedFirefoxVersion && (typeof geckoDriverTargetPath) === 'string')
+
+    browserVersion = majorBrowserVersion(browserVersion);
+
+    if (browserVersion && !browserDriverVersions[browserVersion])
     {
-        return installDriverWithVersion(GECKO_DRIVER_NAME, GECKO_DRIVER_BIN_PATH, geckoDriverTargetPath,
-            geckoDriverVersions[
-                detectedFirefoxVersion]);
-    }
-    else
-    {
-        console.log('No Firefox version or target path is provided. Skipping...');
+        throw new Error(
+            `Failed to locate a version of ${driverName} that matches the installed version of ${browserName} (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
+        );
     }
 
-    return false;
+    return installDriverWithVersion(driverName, driverBinPath, targetPath, browserDriverVersions[browserVersion]);
 }
 
 function majorBrowserVersion(browserVersionString)
