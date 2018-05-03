@@ -17,10 +17,8 @@
     "name": "browser-driver-installer",
     "repository": "github:unscrambl/browser-driver-installer",
     "scripts": {
-        "install-chromedriver": "node ./index.js --browser-name chrome --browser-version $BROWSER_DRIVER_INSTALLER_CHROME_VERSION --target-path $BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH",
-        "install-geckodriver": "node ./index.js --browser-name firefox --browser-version $BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION --target-path $BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH",
-        "postinstall": "npm run install-chromedriver && npm run install-geckodriver",
+        "postinstall": "./postinstall",
         "test": "node_modules/mocha/bin/mocha *.spec.js"
     },
-    "version": "1.0.2"
+    "version": "1.0.3"
 }

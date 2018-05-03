@@ -44,8 +44,11 @@ describe('browserDriverInstaller', function ()
     it('should throw an error if the provided version does not included in the JSON file', function ()
     {
         const wrongVersionNumber = '1';
-        expect(function () { installer.driverInstaller('chrome', wrongVersionNumber,
-                '/some/target/path'); }).to.throw(
+        expect(function ()
+        {
+            installer.driverInstaller('chrome', wrongVersionNumber,
+                '/some/target/path');
+        }).to.throw(
             /Failed to locate a version of chromedriver that matches the installed version of chrome \(1\). Valid chrome versions are:*/
         );
     });
