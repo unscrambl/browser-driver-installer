@@ -49,11 +49,11 @@
             "driverVersion": "2.36"
         },
         "66": {
-            "driverNPMPackageVersion": "2.38.2",
+            "driverNPMPackageVersion": "2.38.3",
             "driverVersion": "2.38"
         },
         "67": {
-            "driverNPMPackageVersion": "2.38.2",
+            "driverNPMPackageVersion": "2.38.3",
             "driverVersion": "2.38"
         }
     },
