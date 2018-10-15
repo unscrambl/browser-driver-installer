@@ -5,11 +5,11 @@ const chai = require('chai');
 const installer = require('./installer');
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const chaiSinon = require('sinon-chai');
+const sinonChai = require('sinon-chai');
 const shell = require('shelljs');
 const path = require('path');
 
-chai.use(chaiSinon);
+chai.use(sinonChai);
 
 describe('browserDriverInstaller', function ()
 {
