@@ -5,7 +5,7 @@ const chai = require('chai');
 const installer = require('./installer');
 const expect = require('chai').expect;
 const sinon = require('sinon');
-const chaiSinon = require('chai-sinon');
+const chaiSinon = require('sinon-chai');
 const shell = require('shelljs');
 const path = require('path');
 
@@ -56,7 +56,7 @@ describe('browserDriverInstaller', function ()
     it('should install the chromedriver to specified path if the version is included in the JSON file',
         function ()
         {
-            return installer.driverInstaller('chrome', '54', DRIVER_OUTPUT_PATH).then(function ()
+            return installer.driverInstaller('chrome', '70', DRIVER_OUTPUT_PATH).then(function ()
             {
                 expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'chromedriver'))).to.be.true;
             });
@@ -64,7 +64,7 @@ describe('browserDriverInstaller', function ()
 
     it('should install the geckodriver to specified path if the version is included in the JSON file', function ()
     {
-        return installer.driverInstaller('firefox', '55', DRIVER_OUTPUT_PATH).then(function ()
+        return installer.driverInstaller('firefox', '62', DRIVER_OUTPUT_PATH).then(function ()
         {
             expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'geckodriver'))).to.be.true;
         });
@@ -72,9 +72,9 @@ describe('browserDriverInstaller', function ()
 
     it('should not install again if the wanted version is already installed', function ()
     {
-        return installer.driverInstaller('chrome', '54', DRIVER_OUTPUT_PATH).then(function ()
+        return installer.driverInstaller('chrome', '70', DRIVER_OUTPUT_PATH).then(function ()
         {
-            expect(installer.driverInstaller('chrome', '54', DRIVER_OUTPUT_PATH)).to.be.false;
+            expect(installer.driverInstaller('chrome', '70', DRIVER_OUTPUT_PATH)).to.be.false;
         });
     });
 });
