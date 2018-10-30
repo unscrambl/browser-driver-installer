@@ -101,6 +101,10 @@
         "62": {
             "driverNPMPackageVersion": "1.12.2",
             "driverVersion": "0.21.0"
+        },
+        "63": {
+            "driverNPMPackageVersion": "1.12.2",
+            "driverVersion": "0.21.0"
         }
     }
 }
