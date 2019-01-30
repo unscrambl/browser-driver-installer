@@ -20,5 +20,5 @@
         "postinstall": "./postinstall",
         "test": "node_modules/mocha/bin/mocha *.spec.js"
     },
-    "version": "1.0.13"
+    "version": "1.0.14"
 }
