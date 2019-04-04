@@ -38,7 +38,7 @@ describe('browserDriverInstaller', function ()
         function ()
         {
             expect(function () { installer.driverInstaller(); }).to.throw(
-                'Parameters are not valid strings.');
+                'the parameters are not valid strings');
         });
 
     it('should throw an error if the provided version does not included in the JSON file', function ()
@@ -49,7 +49,7 @@ describe('browserDriverInstaller', function ()
             installer.driverInstaller('chrome', wrongVersionNumber,
                 '/some/target/path');
         }).to.throw(
-            /Failed to locate a version of chromedriver that matches the installed version of chrome \(1\). Valid chrome versions are:*/
+            /failed to locate a version of chromedriver that matches the installed version of chrome \(1\). Valid chrome versions are:*/
         );
     });
 

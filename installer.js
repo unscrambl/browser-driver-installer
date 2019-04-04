@@ -40,7 +40,7 @@ function installDriverWithVersion(driverName, driverBinPath, targetPath, version
         },
         function (e)
         {
-            throw new Error('package dependencies installation failed with error, details: ' + e.toString());
+            throw new Error('installation of the package dependencies has failed, details: ' + e.toString());
         });
 }
 
@@ -98,7 +98,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
 {
     if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
     {
-        throw new Error('parameters are not valid strings.');
+        throw new Error('parameters are not valid strings');
     }
     // GeckoDriver NPM package versions are defined according to https://github.com/mozilla/geckodriver/releases
     // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
@@ -123,7 +123,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
     else
     {
         throw new Error(
-            `browser name "${browserName}" is not a valid browser name. Valid browser names are: ${(VALID_BROWSER_NAMES).join(', ')}`
+            `browser name "${browserName}" is not a valid browser name. The valid names are: ${(VALID_BROWSER_NAMES).join(', ')}`
         );
     }
 
@@ -132,7 +132,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
     if (browserVersion && !browserDriverVersions[browserVersion])
     {
         throw new Error(
-            `failed to locate a version of ${driverName} that matches the installed version of ${browserName} (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
+            `failed to locate a version of the ${driverName} that matches the installed version of ${browserName} (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
         );
     }
 
