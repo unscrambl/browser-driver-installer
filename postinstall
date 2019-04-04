@@ -6,7 +6,7 @@ if [[ -n "${BROWSER_DRIVER_INSTALLER_CHROME_VERSION:-}" && -n "${BROWSER_DRIVER_
                     --browser-version "$BROWSER_DRIVER_INSTALLER_CHROME_VERSION" \
                     --target-path "$BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH" || return_code=$?
 else 
-    echo "Environment variables for Chrome are not set, skipping post-install for Chrome"
+    echo "The environment variables for Chrome are not set, skipping post-install for Chrome"
 fi
 
 if [[ -n "${BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION:-}" && -n "${BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH:-}" ]]; then
@@ -14,7 +14,7 @@ if [[ -n "${BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION:-}" && -n "${BROWSER_DRIVER
                     --browser-version "$BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION" \
                     --target-path "$BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH" || return_code=$?
 else 
-    echo "Environment variables for Firefox are not set, skipping post-install for Firefox"
+    echo "The environment variables for Firefox are not set, skipping post-install for Firefox"
 fi
 
 exit $return_code

@@ -66,7 +66,7 @@ function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
         console.log(
             `${driverName} expected version (${driverExpectedVersion}) does not match with the installed version (${driverMajorVersion}).`
         );
-        console.log('Removing the old version...');
+        console.log('removing the old version...');
         shell.rm(path.join(targetPath, driverName));
         return false;
     }
@@ -90,7 +90,7 @@ function driverVersionString(driverName, targetPath)
     }
     else
     {
-        throw new Error(`No driver exists with the name ${driverName}.`);
+        throw new Error(`no driver exists with the name ${driverName}.`);
     }
 }
 
@@ -98,7 +98,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
 {
     if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
     {
-        throw new Error('Parameters are not valid strings.');
+        throw new Error('parameters are not valid strings.');
     }
     // GeckoDriver NPM package versions are defined according to https://github.com/mozilla/geckodriver/releases
     // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
@@ -123,7 +123,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
     else
     {
         throw new Error(
-            `Browser name "${browserName}" is not a valid browser name. Valid browser names are: ${(VALID_BROWSER_NAMES).join(', ')}`
+            `browser name "${browserName}" is not a valid browser name. Valid browser names are: ${(VALID_BROWSER_NAMES).join(', ')}`
         );
     }
 
@@ -132,7 +132,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
     if (browserVersion && !browserDriverVersions[browserVersion])
     {
         throw new Error(
-            `Failed to locate a version of ${driverName} that matches the installed version of ${browserName} (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
+            `failed to locate a version of ${driverName} that matches the installed version of ${browserName} (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
         );
     }
 
