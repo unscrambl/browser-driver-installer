@@ -35,12 +35,12 @@ function installDriverWithVersion(driverName, driverBinPath, targetPath, version
             shell.mkdir('-p', targetPath);
             shell.cp('-n', path.join(TEMP_DIR, driverBinPath), targetPath);
             shell.rm('-rf', TEMP_DIR);
-            console.log('package dependencies have been installed');
+            console.log('the package dependencies have been installed');
             return true;
         },
         function (e)
         {
-            throw new Error('installation of the package dependencies has failed, details: ' + e.toString());
+            throw new Error('the installation of the package dependencies has failed, details: ' + e.toString());
         });
 }
 
@@ -98,7 +98,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
 {
     if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
     {
-        throw new Error('parameters are not valid strings');
+        throw new Error('the parameters are not valid strings');
     }
     // GeckoDriver NPM package versions are defined according to https://github.com/mozilla/geckodriver/releases
     // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
