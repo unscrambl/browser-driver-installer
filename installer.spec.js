@@ -47,7 +47,7 @@ describe('browserDriverInstaller', function ()
         {
             installer.driverInstaller('Chrome', wrongVersionNumber, '/some/target/path');
         }).to.throw(
-            /failed to locate a version of the chromedriver that matches the installed version of Chrome \(1\). Valid Chrome versions are:*/
+            /failed to locate a version of the chromedriver that matches the installed Chrome version \(1\). Valid Chrome versions are:*/
         );
     });
 
