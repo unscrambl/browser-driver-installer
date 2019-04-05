@@ -41,7 +41,7 @@ describe('browserDriverInstaller', function ()
                 'the parameters are not valid strings');
         });
 
-    it('should throw an error if the provided version does not included in the JSON file', function ()
+    it('should throw an error if the provided version is not included in the JSON file', function ()
     {
         const wrongVersionNumber = '1';
         expect(function ()
