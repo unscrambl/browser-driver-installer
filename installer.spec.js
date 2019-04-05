@@ -37,26 +37,24 @@ describe('browserDriverInstaller', function ()
     it('should not attempt to install anything if one of the path, version or both parameters are not provided',
         function ()
         {
-            expect(function () { installer.driverInstaller(); }).to.throw(
-                'Parameters are not valid strings.');
+            expect(function () { installer.driverInstaller(); }).to.throw('the parameters are not valid strings');
         });
 
-    it('should throw an error if the provided version does not included in the JSON file', function ()
+    it('should throw an error if the provided version is not included in the JSON file', function ()
     {
         const wrongVersionNumber = '1';
         expect(function ()
         {
-            installer.driverInstaller('chrome', wrongVersionNumber,
-                '/some/target/path');
+            installer.driverInstaller('Chrome', wrongVersionNumber, '/some/target/path');
         }).to.throw(
-            /Failed to locate a version of chromedriver that matches the installed version of chrome \(1\). Valid chrome versions are:*/
+            /failed to locate a version of the chromedriver that matches the installed version of Chrome \(1\). Valid Chrome versions are:*/
         );
     });
 
     it('should install the chromedriver to specified path if the version is included in the JSON file',
         function ()
         {
-            return installer.driverInstaller('chrome', '70', DRIVER_OUTPUT_PATH).then(function ()
+            return installer.driverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH).then(function ()
             {
                 expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'chromedriver'))).to.be.true;
             });
@@ -64,7 +62,7 @@ describe('browserDriverInstaller', function ()
 
     it('should install the geckodriver to specified path if the version is included in the JSON file', function ()
     {
-        return installer.driverInstaller('firefox', '62', DRIVER_OUTPUT_PATH).then(function ()
+        return installer.driverInstaller('Firefox', '62', DRIVER_OUTPUT_PATH).then(function ()
         {
             expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'geckodriver'))).to.be.true;
         });
@@ -72,9 +70,9 @@ describe('browserDriverInstaller', function ()
 
     it('should not install again if the wanted version is already installed', function ()
     {
-        return installer.driverInstaller('chrome', '70', DRIVER_OUTPUT_PATH).then(function ()
+        return installer.driverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH).then(function ()
         {
-            expect(installer.driverInstaller('chrome', '70', DRIVER_OUTPUT_PATH)).to.be.false;
+            expect(installer.driverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH)).to.be.false;
         });
     });
 });
