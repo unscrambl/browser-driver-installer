@@ -40,7 +40,7 @@ function installDriverWithVersion(driverName, driverBinPath, targetPath, version
         },
         function (e)
         {
-            throw new Error('the installation of the package dependencies has failed, details: ' + e.toString());
+            throw new Error('the installation of the package dependencies failed, details: ' + e.toString());
         });
 }
 
@@ -123,7 +123,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
     else
     {
         throw new Error(
-            `browser name "${browserName}" is not a valid browser name. The valid names are: ${(VALID_BROWSER_NAMES).join(', ')}`
+            `"${browserName}" is not a valid browser name. The valid names are: ${(VALID_BROWSER_NAMES).join(', ')}`
         );
     }
 
@@ -132,7 +132,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
     if (browserVersion && !browserDriverVersions[browserVersion])
     {
         throw new Error(
-            `failed to locate a version of the ${driverName} that matches the installed version of ${browserName} (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
+            `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
         );
     }
 
