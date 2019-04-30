@@ -79,7 +79,11 @@
         "73": {
             "driverNPMPackageVersion": "2.46.0",
             "driverVersion": "2.46"
-        }
+        },
+	"74": {
+	    "driverNPMPackageVersion": "74.0.0",
+            "driverVersion": "74.0.3729.6"
+	}
     },
     "geckoDriverVersions": {
         "55": {
