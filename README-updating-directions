@@ -1,0 +1,7 @@
+- switch to you branch
+- pull from master
+- make your changes
+- update package.json
+- remove package-lock.json and node_modules
+- run: npm install --package-lock
+- create PR
