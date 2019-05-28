@@ -25,16 +25,16 @@ function installDriverWithVersion(driverName, driverBinPath, targetPath, version
         return false;
     }
 
-    shell.mkdir('--parents', TEMP_DIR);
+    shell.mkdir('-p', TEMP_DIR);
 
     return runNpmChildProcess(['install', `${driverName}@${versionObject.driverNPMPackageVersion}`, '--prefix',
         TEMP_DIR
     ]).then(
         function ()
         {
-            shell.mkdir('--parents', targetPath);
-            shell.cp('--no-clobber', path.join(TEMP_DIR, driverBinPath), targetPath);
-            shell.rm('--recursive --force', TEMP_DIR);
+            shell.mkdir('-p', targetPath);
+            shell.cp('-n', path.join(TEMP_DIR, driverBinPath), targetPath);
+            shell.rm('-rf', TEMP_DIR);
             console.log('the package dependencies were installed');
             return true;
         },
@@ -64,8 +64,7 @@ function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
     if (driverMajorVersion !== driverExpectedVersion)
     {
         console.log(
-            `the ${driverName} expected version (${driverExpectedVersion}) does not match with the installed version (${driverMajorVersion})`
-        );
+            `the ${driverName} expected version (${driverExpectedVersion}) does not match the installed version (${driverMajorVersion})`);
         console.log('removing the old version');
         shell.rm(path.join(targetPath, driverName));
         return false;
@@ -131,6 +130,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
 
     if (browserVersion && !browserDriverVersions[browserVersion])
     {
+//        console.log(`failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`);
         throw new Error(
             `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
         );
@@ -153,7 +153,7 @@ function majorBrowserVersion(browserVersionString)
         throw new Error(
             `unable to extract the browser version from the '${browserVersionString}' string`);
     }
-    return  matches[0];
+    return matches[0];
 }
 
 module.exports.driverInstaller = driverInstaller;
