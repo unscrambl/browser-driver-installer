@@ -64,13 +64,13 @@ function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
     if (driverMajorVersion !== driverExpectedVersion)
     {
         console.log(
-            `the ${driverName} expected version (${driverExpectedVersion}) does not match the installed version (${driverMajorVersion})`);
+            `the expected version (${driverExpectedVersion}) for the ${driverName} does not match the installed one (${driverMajorVersion})`);
         console.log('removing the old version');
         shell.rm(path.join(targetPath, driverName));
         return false;
     }
 
-    console.log(`the ${driverName} version ${driverExpectedVersion} has already been installed`);
+    console.log(`the ${driverName} version ${driverExpectedVersion} was already installed`);
     return true;
 }
 
@@ -130,7 +130,6 @@ function driverInstaller(browserName, browserVersion, targetPath)
 
     if (browserVersion && !browserDriverVersions[browserVersion])
     {
-//        console.log(`failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`);
         throw new Error(
             `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
         );
