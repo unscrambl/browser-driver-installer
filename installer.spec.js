@@ -34,7 +34,7 @@ describe('browserDriverInstaller', function ()
         shell.rm('-rf', DRIVER_OUTPUT_PATH);
     }
 
-    it('should not attempt to install anything if one of the path, version or both parameters are not provided',
+    it('should not attempt to install anything if one of the path, version or both parameters is not provided',
         function ()
         {
             expect(function () { installer.driverInstaller(); }).to.throw('the parameters are not valid strings');
@@ -47,7 +47,7 @@ describe('browserDriverInstaller', function ()
         {
             installer.driverInstaller('Chrome', wrongVersionNumber, '/some/target/path');
         }).to.throw(
-            /failed to locate a version of the chromedriver that matches the installed Chrome version \(1\). Valid Chrome versions are:*/
+            /failed to locate a version of the chromedriver that matches the installed Chrome version \(1\), the valid Chrome versions are:*/
         );
     });
 

@@ -35,7 +35,7 @@ function installDriverWithVersion(driverName, driverBinPath, targetPath, version
             shell.mkdir('-p', targetPath);
             shell.cp('-n', path.join(TEMP_DIR, driverBinPath), targetPath);
             shell.rm('-rf', TEMP_DIR);
-            console.log('the package dependencies have been installed');
+            console.log('the package dependencies were installed');
             return true;
         },
         function (e)
@@ -50,28 +50,27 @@ function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
     {
         return false;
     }
-    console.log(`Directory '${targetPath}' does exist.`);
-    console.log(`Checking if the directory contains a ${driverName}...`);
+    console.log(`the '${targetPath}' directory exists`);
+    console.log(`checking if the directory contains the ${driverName}`);
 
     if (!shell.test('-e', path.join(targetPath, driverName)))
     {
-        console.log(`Could not find the ${driverName} in the directory '${targetPath}'. Attempting to install it...`);
+        console.log(`failed to find the ${driverName} in the directory '${targetPath}', attempting to install it`);
         return false;
     }
 
-    console.log(`${driverName} found.`);
+    console.log(`the ${driverName} was found`);
     const driverMajorVersion = driverVersionString(driverName, targetPath);
     if (driverMajorVersion !== driverExpectedVersion)
     {
         console.log(
-            `${driverName} expected version (${driverExpectedVersion}) does not match with the installed version (${driverMajorVersion}).`
-        );
-        console.log('removing the old version...');
+            `the ${driverName} expected version (${driverExpectedVersion}) does not match the installed version (${driverMajorVersion})`);
+        console.log('removing the old version');
         shell.rm(path.join(targetPath, driverName));
         return false;
     }
 
-    console.log(`${driverName} version ${driverExpectedVersion} has already been installed!`);
+    console.log(`the ${driverName} version ${driverExpectedVersion} has already been installed`);
     return true;
 }
 
@@ -80,17 +79,17 @@ function driverVersionString(driverName, targetPath)
     let versionOutput = null;
     if (driverName === CHROME_DRIVER_NAME)
     {
-        versionOutput = execSync(path.join(targetPath, driverName) + ' -v').toString();
+        versionOutput = execSync(path.join(targetPath, driverName) + ' --version').toString();
         return versionOutput.match(CHROME_DRIVER_VERSION_REGEX)[1];
     }
     else if (driverName === GECKO_DRIVER_NAME)
     {
-        versionOutput = execSync(path.join(targetPath, driverName) + ' -V').toString();
+        versionOutput = execSync(path.join(targetPath, driverName) + ' --version').toString();
         return versionOutput.match(GECKO_DRIVER_VERSION_REGEX)[1];
     }
     else
     {
-        throw new Error(`no driver exists with the name ${driverName}.`);
+        throw new Error(`no driver exists with the name ${driverName}`);
     }
 }
 
@@ -123,7 +122,7 @@ function driverInstaller(browserName, browserVersion, targetPath)
     else
     {
         throw new Error(
-            `"${browserName}" is not a valid browser name. The valid names are: ${(VALID_BROWSER_NAMES).join(', ')}`
+            `"${browserName}" is not a valid browser name, the valid names are: ${(VALID_BROWSER_NAMES).join(', ')}`
         );
     }
 
@@ -131,8 +130,9 @@ function driverInstaller(browserName, browserVersion, targetPath)
 
     if (browserVersion && !browserDriverVersions[browserVersion])
     {
+//        console.log(`failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`);
         throw new Error(
-            `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}). Valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
+            `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
         );
     }
 
@@ -141,7 +141,19 @@ function driverInstaller(browserName, browserVersion, targetPath)
 
 function majorBrowserVersion(browserVersionString)
 {
-    return (typeof browserVersionString) === 'string' && browserVersionString.match(BROWSER_MAJOR_VERSION_REGEX)[0];
+    let browserVersionStringType = typeof browserVersionString;
+    if (browserVersionStringType !== 'string')
+    {
+        throw new Error(
+            `invalid type for the 'browserVersionString' argument, details: expected a string, found ${browserVersionStringType}`);
+    }
+    let matches = browserVersionString.match(BROWSER_MAJOR_VERSION_REGEX);
+    if (matches == null || matches.length < 1)
+    {
+        throw new Error(
+            `unable to extract the browser version from the '${browserVersionString}' string`);
+    }
+    return matches[0];
 }
 
 module.exports.driverInstaller = driverInstaller;

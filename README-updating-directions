@@ -4,4 +4,5 @@
 - update package.json
 - remove package-lock.json and node_modules
 - run: npm install --package-lock
+- run: npm run test
 - create PR
