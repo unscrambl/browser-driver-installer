@@ -10,7 +10,7 @@ if [[ -n "${BROWSER_DRIVER_INSTALLER_CHROME_VERSION:-}" && -n "${BROWSER_DRIVER_
                     --browser-version "$BROWSER_DRIVER_INSTALLER_CHROME_VERSION"                    \
                     --target-path "$BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH"
 else
-    echo "The environment variables related to Chrome (BROWSER_DRIVER_INSTALLER_CHROME_VERSION and BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH) are not set, skipping the installation step for Chrome"
+    echo "One or both of the environment variables related to Chrome (BROWSER_DRIVER_INSTALLER_CHROME_VERSION and BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH) are not set, skipping the installation step for Chrome"
 fi
 
 if [[ -n "${BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION:-}" && -n "${BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH:-}" ]]; then
@@ -18,5 +18,5 @@ if [[ -n "${BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION:-}" && -n "${BROWSER_DRIVER
                     --browser-version "$BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION"                   \
                     --target-path "$BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH"
 else
-    echo "The environment variables related to Firefox (BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION and BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH) are not set, skipping the installation step for Firefox"
+    echo "One or both of the environment variables related to Firefox (BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION and BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH) are not set, skipping the installation step for Firefox"
 fi
