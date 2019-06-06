@@ -29,10 +29,7 @@ function installDriverWithVersion(driverName, driverBinPath, targetPath, npmPack
 
     return runNpmChildProcess(['install', `${driverName}@${npmPackageAndDriverVersion.driverNPMPackageVersion}`, '--prefix',
         TEMP_DIR
-    ]).catch(
-        function(e) {
-            console.log(e.message); // "oh, no!"
-        }).then(
+    ]).then(
         function ()
         {
             shell.mkdir('-p', targetPath);
