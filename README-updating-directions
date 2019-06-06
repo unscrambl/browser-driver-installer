@@ -5,4 +5,5 @@
 - remove package-lock.json and node_modules
 - run: npm install --package-lock
 - run: npm run test
+- run a manual test, e.g.,: BROWSER_DRIVER_INSTALLER_CHROME_VERSION=75 BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION=67 BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH=/tmp BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH=/tmp ./postinstall
 - create PR

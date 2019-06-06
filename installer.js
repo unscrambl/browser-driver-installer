@@ -35,42 +35,44 @@ function installDriverWithVersion(driverName, driverBinPath, targetPath, npmPack
             shell.mkdir('-p', targetPath);
             shell.cp('-n', path.join(TEMP_DIR, driverBinPath), targetPath);
             shell.rm('-rf', TEMP_DIR);
-            console.log('the package dependencies were installed');
+            console.log(`the package dependencies for the '${driverName}' driver were installed`);
             return true;
         },
-        function (e)
+        function (reason)
         {
-            throw new Error('the installation of the package dependencies failed, details: ' + e.toString());
+            throw new Error(`the installation of the package dependencies for the '${driverName}' driver failed, details: ${reason.toString()}`);
         });
 }
 
 function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
 {
+    targetPath = path.resolve(targetPath);
+    console.log(`checking if the '${targetPath}' installation directory for the '${driverName}' driver exists`);
     if (!shell.test('-e', targetPath))
     {
+        console.log(`the '${targetPath}' installation directory for the '${driverName}' driver does not exist`);
         return false;
     }
-    console.log(`the '${targetPath}' directory exists`);
-    console.log(`checking if the directory contains the ${driverName}`);
 
+    console.log(`the '${targetPath}' installation directory exists, checking if it contains the ${driverName}`);
     if (!shell.test('-e', path.join(targetPath, driverName)))
     {
-        console.log(`failed to find the ${driverName} in the directory '${targetPath}', attempting to install it`);
+        console.log(`failed to find the ${driverName} in the '${targetPath}' installation directory`);
         return false;
     }
 
-    console.log(`the ${driverName} was found`);
+    console.log(`the '${driverName}' driver was found in the '${targetPath}' installation directory`);
     const driverMajorVersion = driverVersionString(driverName, targetPath);
     if (driverMajorVersion !== driverExpectedVersion)
     {
         console.log(
-            `the expected version (${driverExpectedVersion}) for the ${driverName} does not match the installed one (${driverMajorVersion})`);
-        console.log('removing the old version');
-        shell.rm(path.join(targetPath, driverName));
+            `the expected version (${driverExpectedVersion}) for the '${driverName}' driver does not match the installed one (${driverMajorVersion}), removing the old version`);
+        shell.rm('-rf', path.join(targetPath, driverName));
         return false;
     }
 
-    console.log(`the ${driverName} version ${driverExpectedVersion} was already installed`);
+    console.log(`the expected version (${driverExpectedVersion}) for the '${driverName}' driver had been previously installed`);
+
     return true;
 }
 
