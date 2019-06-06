@@ -81,5 +81,13 @@ function createNpmChildProcess(processArgs)
         {
             reject(error);
         });
+
+        process.on('unhandledRejection', (reason, promise) =>
+        {
+            // we are throwing an error here to avoid the process exiting with 0 exit code and not running subsequent
+           // tests in case of an unhandled promise rejection
+           var reason_stack_or_reason = reason.stack || reason
+           console.log(`the execution failed due to an unhandled promise rejection, details: ${reason_stack_or_reason}`);
+        });
     });
 }

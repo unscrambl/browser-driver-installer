@@ -18,16 +18,16 @@ const FIREFOX_BROWSER_NAME = 'firefox';
 const TEMP_DIR = 'temp';
 const VALID_BROWSER_NAMES = [CHROME_BROWSER_NAME, FIREFOX_BROWSER_NAME];
 
-function installDriverWithVersion(driverName, driverBinPath, targetPath, versionObject)
+function installDriverWithVersion(driverName, driverBinPath, targetPath, npmPackageAndDriverVersion)
 {
-    if (checkDirectoryAndVersion(driverName, targetPath, versionObject.driverVersion))
+    if (checkDirectoryAndVersion(driverName, targetPath, npmPackageAndDriverVersion.driverVersion))
     {
         return false;
     }
 
     shell.mkdir('-p', TEMP_DIR);
 
-    return runNpmChildProcess(['install', `${driverName}@${versionObject.driverNPMPackageVersion}`, '--prefix',
+    return runNpmChildProcess(['install', `${driverName}@${npmPackageAndDriverVersion.driverNPMPackageVersion}`, '--prefix',
         TEMP_DIR
     ]).then(
         function ()
@@ -101,21 +101,22 @@ function driverInstaller(browserName, browserVersion, targetPath)
     }
     // GeckoDriver NPM package versions are defined according to https://github.com/mozilla/geckodriver/releases
     // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
-    const browserVersionsObject = JSON.parse(shell.cat(path.resolve(__dirname, 'driverVersions.json')));
+    const browserAndDriverMappingInformation = JSON.parse(shell.cat(path.resolve(__dirname,
+        'browserAndDriverMappingInformation.json')));
 
-    let browserDriverVersions = null;
+    let browserVersion2NPMPackageAndDriverVersion = null;
     let driverBinPath = null;
     let driverName = null;
 
     if (browserName.toLowerCase() === CHROME_BROWSER_NAME)
     {
-        browserDriverVersions = browserVersionsObject.chromeDriverVersions;
+        browserVersion2NPMPackageAndDriverVersion = browserAndDriverMappingInformation.chromeDriverVersions;
         driverBinPath = CHROME_DRIVER_BIN_PATH;
         driverName = CHROME_DRIVER_NAME;
     }
     else if (browserName.toLowerCase() === FIREFOX_BROWSER_NAME)
     {
-        browserDriverVersions = browserVersionsObject.geckoDriverVersions;
+        browserVersion2NPMPackageAndDriverVersion = browserAndDriverMappingInformation.geckoDriverVersions;
         driverBinPath = GECKO_DRIVER_BIN_PATH;
         driverName = GECKO_DRIVER_NAME;
     }
@@ -127,15 +128,20 @@ function driverInstaller(browserName, browserVersion, targetPath)
     }
 
     browserVersion = majorBrowserVersion(browserVersion);
-
-    if (browserVersion && !browserDriverVersions[browserVersion])
+    if (browserVersion && !browserVersion2NPMPackageAndDriverVersion[browserVersion])
     {
+        if (browserName.toLowerCase() === CHROME_BROWSER_NAME && Number(browserVersion) > 74)
+        {
+            var npmPackageAndDriverVersion = { driverNPMPackageVersion: browserVersion + ".0.0", driverVersion: browserVersion + ".0" };
+
+            return installDriverWithVersion(driverName, driverBinPath, targetPath, npmPackageAndDriverVersion);
+        }
         throw new Error(
-            `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserDriverVersions).join(', ')}`
+            `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserVersion2NPMPackageAndDriverVersion).join(', ')}`
         );
     }
 
-    return installDriverWithVersion(driverName, driverBinPath, targetPath, browserDriverVersions[browserVersion]);
+    return installDriverWithVersion(driverName, driverBinPath, targetPath, browserVersion2NPMPackageAndDriverVersion[browserVersion]);
 }
 
 function majorBrowserVersion(browserVersionString)

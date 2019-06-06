@@ -3,13 +3,14 @@
 [ "${BASH_SOURCE[0]}" != "$0" ] && { echo "ERROR: this script must be executed by Bash, neither source'd nor executed by a different shell"; return 1; }
 
 set -e
+set -u
 
 if [[ -n "${BROWSER_DRIVER_INSTALLER_CHROME_VERSION:-}" && -n "${BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH:-}" ]]; then
     node ./index.js --browser-name Chrome                                        \
                     --browser-version "$BROWSER_DRIVER_INSTALLER_CHROME_VERSION" \
                     --target-path "$BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH"
 else
-    echo "The environment variables for Chrome (BROWSER_DRIVER_INSTALLER_CHROME_VERSION, BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH) are not set, skipping the post-install step for Chrome"
+    echo "The environment variables related to Chrome (BROWSER_DRIVER_INSTALLER_CHROME_VERSION are BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH) are not set, skipping the post-install step for Chrome"
 fi
 
 if [[ -n "${BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION:-}" && -n "${BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH:-}" ]]; then
@@ -17,5 +18,5 @@ if [[ -n "${BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION:-}" && -n "${BROWSER_DRIVER
                     --browser-version "$BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION" \
                     --target-path "$BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH"
 else
-    echo "The environment variables for Firefox (BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION, BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH) are not set, skipping the post-install step for Firefox"
+    echo "The environment variables related to Firefox (BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION and BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH) are not set, skipping the post-install step for Firefox"
 fi
