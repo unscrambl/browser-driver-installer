@@ -141,6 +141,10 @@
         "68": {
             "driverNPMPackageVersion": "1.16.2",
             "driverVersion": "0.24.0"
+        },
+        "69": {
+            "driverNPMPackageVersion": "1.16.2",
+            "driverVersion": "0.24.0"
         }
     }
 }
