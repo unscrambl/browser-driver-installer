@@ -1,13 +1,16 @@
 {
     "author": "Unscrambl",
     "bin": {
-        "browserDriverInstaller": "./index.js"
+        "browserDriverInstaller": "./index.js",
+        "checkEnvironmentAndInstall": "./check-environment-and-install"
     },
     "dependencies": {
         "chai": "4.1.2",
         "sinon-chai": "3.2.0",
         "commander": "2.15.1",
+        "detect-mocha": "0.1.0",
         "mocha": "5.1.1",
+        "readable-stream": "3.4.0",
         "shelljs": "0.8.1",
         "sinon": "5.0.2"
     },
@@ -20,5 +23,5 @@
         "postinstall": "./postinstall",
         "test": "node_modules/mocha/bin/mocha *.spec.js"
     },
-    "version": "1.0.24"
+    "version": "1.0.31"
 }
