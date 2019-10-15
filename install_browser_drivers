@@ -1,0 +1,22 @@
+#!/bin/bash
+
+[[ "${BASH_SOURCE[0]}" != "$0" ]] && { echo "ERROR: this script must be executed by Bash, neither source'd nor executed by a different shell"; return 1; }
+
+set -e
+set -u
+
+if [[ -v BROWSER_DRIVER_INSTALLER_CHROME_VERSION && -v BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH ]]; then
+    node ./index.js --browser-name Chrome                                        \
+                    --browser-version "$BROWSER_DRIVER_INSTALLER_CHROME_VERSION" \
+                    --target-path "$BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH"
+else
+    echo "One or both of the environment variables related to Chrome (BROWSER_DRIVER_INSTALLER_CHROME_VERSION are BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH) are not set, skipping the installation for Chrome"
+fi
+
+if [[ -v BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION && -v BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH ]]; then
+    node ./index.js --browser-name Firefox                                        \
+                    --browser-version "$BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION" \
+                    --target-path "$BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH"
+else
+    echo "One or both of the environment variables related to Firefox (BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION and BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH) are not set, skipping the installation for Firefox"
+fi

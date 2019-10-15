@@ -1,50 +1,93 @@
 'use strict';
 /* eslint-disable no-console */
 
-const runNpmChildProcess = require('./runNpmChildProcess');
-const path = require('path');
 const execSync = require('child_process').execSync;
+const extractZip = require('extract-zip');
+const fs = require('fs');
+const path = require('path');
+const request = require('request');
 const shell = require('shelljs');
+const tar = require('tar');
 
 const BROWSER_MAJOR_VERSION_REGEX = new RegExp(/^(\d+)/);
 const CHROME_BROWSER_NAME = 'chrome';
 const CHROME_DRIVER_NAME = 'chromedriver';
-const CHROME_DRIVER_BIN_PATH = path.join('node_modules', 'chromedriver', 'lib', 'chromedriver', CHROME_DRIVER_NAME);
 const CHROME_DRIVER_VERSION_REGEX = new RegExp(/\w+ ([0-9]+.[0-9]+).+/);
 const GECKO_DRIVER_NAME = 'geckodriver';
-const GECKO_DRIVER_BIN_PATH = path.join('node_modules', 'geckodriver', GECKO_DRIVER_NAME);
 const GECKO_DRIVER_VERSION_REGEX = new RegExp(/\w+\s(\d+.\d+.\d+)/);
 const FIREFOX_BROWSER_NAME = 'firefox';
-const TEMP_DIR = 'temp';
 const VALID_BROWSER_NAMES = [CHROME_BROWSER_NAME, FIREFOX_BROWSER_NAME];
 
-function installDriverWithVersion(driverName, driverBinPath, targetPath, npmPackageAndDriverVersion)
+function checkIfSupportedPlatform()
 {
-    if (checkDirectoryAndVersion(driverName, targetPath, npmPackageAndDriverVersion.driverVersion))
+    let arch = process.arch;
+    let platform = process.platform;
+
+    if (platform !== 'linux' || arch !== 'x64')
     {
-        return false;
+        throw new Error(`Unsupported platform/architecture: ${platform} ${arch}. Only Linux x64 systems are supported`);
     }
-
-    shell.mkdir('-p', TEMP_DIR);
-
-    return runNpmChildProcess(['install', `${driverName}@${npmPackageAndDriverVersion.driverNPMPackageVersion}`, '--prefix',
-        TEMP_DIR
-    ]).then(
-        function ()
-        {
-            shell.mkdir('-p', targetPath);
-            shell.cp('-n', path.join(TEMP_DIR, driverBinPath), targetPath);
-            shell.rm('-rf', TEMP_DIR);
-            console.log(`the package dependencies for the '${driverName}' driver were installed`);
-            return true;
-        },
-        function (reason)
-        {
-            throw new Error(`the installation of the package dependencies for the '${driverName}' driver failed, details: ${reason.toString()}`);
-        });
 }
 
-function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
+function browserDriverInstaller(browserName, browserVersion, targetPath)
+{
+    if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
+    {
+        throw new Error('the parameters are not valid strings');
+    }
+
+    checkIfSupportedPlatform();
+
+    const browser2DriverMappingInformation = JSON.parse(
+        shell.cat(path.resolve(__dirname, 'browserVersion2DriverVersion.json')));
+
+    let browserVersion2DriverVersion = null;
+    let driverName = null;
+    const browserNameLowerCase = browserName.toLowerCase();
+
+    if (browserNameLowerCase === CHROME_BROWSER_NAME)
+    {
+        browserVersion2DriverVersion = browser2DriverMappingInformation.chromeDriverVersions;
+        driverName = CHROME_DRIVER_NAME;
+    }
+    else if (browserNameLowerCase === FIREFOX_BROWSER_NAME)
+    {
+        browserVersion2DriverVersion = browser2DriverMappingInformation.geckoDriverVersions;
+        driverName = GECKO_DRIVER_NAME;
+    }
+    else
+    {
+        throw new Error(
+            `"${browserName}" is not a valid browser name, the valid names are: ${(VALID_BROWSER_NAMES).join(', ')}`
+        );
+    }
+
+    browserVersion = majorBrowserVersion(browserVersion);
+    let driverVersion = browserVersion2DriverVersion[browserVersion];
+    if (!driverVersion)
+    {
+        if (browserNameLowerCase === CHROME_BROWSER_NAME && Number(browserVersion) > 72)
+        {
+            // Refer to https://chromedriver.chromium.org/downloads for version compatibility between chromedriver and Chrome
+            driverVersion = 'LATEST_RELEASE_' + browserVersion;
+        }
+        else if (browserNameLowerCase === FIREFOX_BROWSER_NAME && Number(browserVersion) > 60)
+        {
+            // Refer to https://firefox-source-docs.mozilla.org/testing/geckodriver/Support.html for version compatibility between geckodriver and Firefox
+            driverVersion = browserVersion2DriverVersion['60'];
+        }
+        else
+        {
+            throw new Error(
+                `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserVersion2DriverVersion).join(', ')}`
+            );
+        }
+    }
+
+    return installBrowserDriver(driverName, driverVersion, targetPath);
+}
+
+function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
 {
     targetPath = path.resolve(targetPath);
     console.log(`checking if the '${targetPath}' installation directory for the '${driverName}' driver exists`);
@@ -62,88 +105,137 @@ function checkDirectoryAndVersion(driverName, targetPath, driverExpectedVersion)
     }
 
     console.log(`the '${driverName}' driver was found in the '${targetPath}' installation directory`);
-    const driverMajorVersion = driverVersionString(driverName, targetPath);
+    const driverMajorVersion = driverVersion(driverName, targetPath);
     if (driverMajorVersion !== driverExpectedVersion)
     {
         console.log(
-            `the expected version (${driverExpectedVersion}) for the '${driverName}' driver does not match the installed one (${driverMajorVersion}), removing the old version`);
+            `the expected version (${driverExpectedVersion}) for the '${driverName}' driver does not match the installed one (${driverMajorVersion}), removing the old version`
+        );
         shell.rm('-rf', path.join(targetPath, driverName));
         return false;
     }
 
-    console.log(`the expected version (${driverExpectedVersion}) for the '${driverName}' driver had been previously installed`);
+    console.log(
+        `the expected version (${driverExpectedVersion}) for the '${driverName}' driver had been previously installed`
+    );
 
     return true;
 }
 
-function driverVersionString(driverName, targetPath)
+function downloadChromeDriverPackage(driverVersion, targetPath)
 {
-    let versionOutput = null;
-    if (driverName === CHROME_DRIVER_NAME)
+    const downloadUrlBase = 'https://chromedriver.storage.googleapis.com';
+    const driverFileName = 'chromedriver_linux64.zip';
+    const downloadedFilePath = path.resolve(targetPath, driverFileName);
+
+    if (driverVersion.startsWith('LATEST_RELEASE_'))
     {
-        versionOutput = execSync(path.join(targetPath, driverName) + ' --version').toString();
-        return versionOutput.match(CHROME_DRIVER_VERSION_REGEX)[1];
+        const versionQueryUrl = `${downloadUrlBase}/${driverVersion}`;
+        const httpRequest = prepareHttpGetRequest(versionQueryUrl);
+        const response = request(httpRequest);
+        driverVersion = response.body;
     }
-    else if (driverName === GECKO_DRIVER_NAME)
-    {
-        versionOutput = execSync(path.join(targetPath, driverName) + ' --version').toString();
-        return versionOutput.match(GECKO_DRIVER_VERSION_REGEX)[1];
-    }
-    else
-    {
-        throw new Error(`no driver exists with the name ${driverName}`);
-    }
+
+    const downloadUrl = `${downloadUrlBase}/${driverVersion}/${driverFileName}`;
+    downloadFile(downloadUrl, downloadedFilePath);
+    return downloadedFilePath;
 }
 
-function driverInstaller(browserName, browserVersion, targetPath)
+function downloadFile(downloadUrl, downloadedFilePath)
 {
-    if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
+    console.log('Downloading from URL: ', downloadUrl);
+    console.log('Saving to file:', downloadedFilePath);
+    const httpRequest = prepareHttpGetRequest(downloadUrl);
+    let count = 0;
+    let notifiedCount = 0;
+    const outFile = fs.openSync(downloadedFilePath, 'w');
+    const response = request(httpRequest);
+    response.on('error', function (err)
     {
-        throw new Error('the parameters are not valid strings');
-    }
-    // GeckoDriver NPM package versions are defined according to https://github.com/mozilla/geckodriver/releases
-    // ChromeDriver NPM package versions are defined according to https://github.com/giggio/node-chromedriver/releases
-    const browserAndDriverMappingInformation = JSON.parse(shell.cat(path.resolve(__dirname,
-        'browserAndDriverMappingInformation.json')));
+        fs.closeSync(outFile);
+        throw new Error('Error downloading file: ' + err);
+    });
+    response.on('data', function (data)
+    {
+        fs.writeSync(outFile, data, 0, data.length, null);
+        count += data.length;
+        if ((count - notifiedCount) > 800000)
+        {
+            console.log('Received ' + Math.floor(count / 1024) + 'K...');
+            notifiedCount = count;
+        }
+    });
+    response.on('end', function ()
+    {
+        console.log('Received ' + Math.floor(count / 1024) + 'K total.');
+        fs.closeSync(outFile);
+    });
+}
 
-    let browserVersion2NPMPackageAndDriverVersion = null;
-    let driverBinPath = null;
-    let driverName = null;
+function downloadGeckoDriverPackage(driverVersion, targetPath)
+{
+    const downloadUrlBase = 'https://github.com/mozilla/geckodriver/releases/download';
+    const driverFileName = 'geckodriver-v' + driverVersion + '-linux64.tar.gz';
+    const downloadedFilePath = path.resolve(targetPath, driverFileName);
+    const downloadUrl = `${downloadUrlBase}/v${driverVersion}/${driverFileName}`;
+    downloadFile(downloadUrl, downloadedFilePath);
+    return downloadedFilePath;
+}
 
-    if (browserName.toLowerCase() === CHROME_BROWSER_NAME)
+function driverVersion(driverName, targetPath)
+{
+    const versionOutput = execSync(path.join(targetPath, driverName) + ' --version').toString();
+
+    if (driverName === CHROME_DRIVER_NAME)
     {
-        browserVersion2NPMPackageAndDriverVersion = browserAndDriverMappingInformation.chromeDriverVersions;
-        driverBinPath = CHROME_DRIVER_BIN_PATH;
-        driverName = CHROME_DRIVER_NAME;
+        return versionOutput.match(CHROME_DRIVER_VERSION_REGEX)[1];
     }
-    else if (browserName.toLowerCase() === FIREFOX_BROWSER_NAME)
+
+    return versionOutput.match(GECKO_DRIVER_VERSION_REGEX)[1];
+}
+
+function installBrowserDriver(driverName, driverVersion, targetPath)
+{
+    if (doesDriverAlreadyExist(driverName, driverVersion, targetPath))
     {
-        browserVersion2NPMPackageAndDriverVersion = browserAndDriverMappingInformation.geckoDriverVersions;
-        driverBinPath = GECKO_DRIVER_BIN_PATH;
-        driverName = GECKO_DRIVER_NAME;
+        return false;
+    }
+
+    // make sure the target directory exists
+    shell.mkdir('-p', targetPath);
+
+    if (driverName === CHROME_DRIVER_NAME)
+    {
+        installChromeDriver(driverName, driverVersion, targetPath);
     }
     else
     {
-        throw new Error(
-            `"${browserName}" is not a valid browser name, the valid names are: ${(VALID_BROWSER_NAMES).join(', ')}`
-        );
+        installGeckoDriver(driverName, driverVersion, targetPath);
     }
 
-    browserVersion = majorBrowserVersion(browserVersion);
-    if (browserVersion && !browserVersion2NPMPackageAndDriverVersion[browserVersion])
-    {
-        if (browserName.toLowerCase() === CHROME_BROWSER_NAME && Number(browserVersion) > 74)
-        {
-            var npmPackageAndDriverVersion = { driverNPMPackageVersion: browserVersion + ".0.0", driverVersion: browserVersion + ".0" };
+    return true;
+}
 
-            return installDriverWithVersion(driverName, driverBinPath, targetPath, npmPackageAndDriverVersion);
-        }
-        throw new Error(
-            `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserVersion2NPMPackageAndDriverVersion).join(', ')}`
-        );
-    }
+function installChromeDriver(driverVersion, targetPath)
+{
+    const downloadedFilePath = downloadChromeDriverPackage(driverVersion, targetPath);
+    console.log('Extracting driver package contents');
+    extractZip(downloadedFilePath, targetPath);
+    shell.rm(downloadedFilePath);
+    // make sure the driver file is user executable
+    const driverFilePath = path.join(targetPath, CHROME_DRIVER_NAME);
+    fs.chmodSync(driverFilePath, '755');
+}
 
-    return installDriverWithVersion(driverName, driverBinPath, targetPath, browserVersion2NPMPackageAndDriverVersion[browserVersion]);
+function installGeckoDriver(driverVersion, targetPath)
+{
+    const downloadedFilePath = downloadGeckoDriverPackage(driverVersion, targetPath);
+    console.log('Extracting driver package contents');
+    tar.extract({ cwd: targetPath, file: downloadedFilePath, sync: true });
+    shell.rm(downloadedFilePath);
+    // make sure the driver file is user executable
+    const driverFilePath = path.join(targetPath, GECKO_DRIVER_NAME);
+    fs.chmodSync(driverFilePath, '755');
 }
 
 function majorBrowserVersion(browserVersionString)
@@ -152,15 +244,37 @@ function majorBrowserVersion(browserVersionString)
     if (browserVersionStringType !== 'string')
     {
         throw new Error(
-            `invalid type for the 'browserVersionString' argument, details: expected a string, found ${browserVersionStringType}`);
+            `invalid type for the 'browserVersionString' argument, details: expected a string, found ${browserVersionStringType}`
+        );
     }
     let matches = browserVersionString.match(BROWSER_MAJOR_VERSION_REGEX);
-    if (matches == null || matches.length < 1)
+    if (matches === null || matches.length < 1)
     {
-        throw new Error(
-            `unable to extract the browser version from the '${browserVersionString}' string`);
+        throw new Error(`unable to extract the browser version from the '${browserVersionString}' string`);
     }
     return matches[0];
 }
 
-module.exports.driverInstaller = driverInstaller;
+function prepareHttpGetRequest(downloadUrl)
+{
+    const options = {
+        method: 'GET',
+        uri: downloadUrl
+    };
+
+    const proxyUrl = process.env.npm_config_proxy || process.env.npm_config_http_proxy;
+    if (proxyUrl)
+    {
+        options.proxy = proxyUrl;
+    }
+
+    const userAgent = process.env.npm_config_user_agent;
+    if (userAgent)
+    {
+        options.headers = { 'User-Agent': userAgent };
+    }
+
+    return options;
+}
+
+module.exports.browserDriverInstaller = browserDriverInstaller;
