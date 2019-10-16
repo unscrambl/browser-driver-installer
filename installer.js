@@ -84,7 +84,7 @@ async function browserDriverInstaller(browserName, browserVersion, targetPath)
         }
     }
 
-    return installBrowserDriver(driverName, driverVersion, targetPath);
+    return await installBrowserDriver(driverName, driverVersion, targetPath);
 }
 
 function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
@@ -138,7 +138,7 @@ async function downloadChromeDriverPackage(driverVersion, targetPath)
     const downloadUrlBase = 'https://chromedriver.storage.googleapis.com';
     const driverFileName = 'chromedriver_linux64.zip';
     const downloadedFilePath = path.resolve(targetPath, driverFileName);
-
+   
     if (driverVersion.startsWith('LATEST_RELEASE_'))
     {
         const versionQueryUrl = `${downloadUrlBase}/${driverVersion}`;
@@ -220,11 +220,11 @@ async function installBrowserDriver(driverName, driverVersion, targetPath)
 
     if (driverName === CHROME_DRIVER_NAME)
     {
-        await installChromeDriver(driverName, driverVersion, targetPath);
+        await installChromeDriver(driverVersion, targetPath);
     }
     else
     {
-        await installGeckoDriver(driverName, driverVersion, targetPath);
+        await installGeckoDriver(driverVersion, targetPath);
     }
 
     return true;
@@ -234,7 +234,9 @@ async function installChromeDriver(driverVersion, targetPath)
 {
     const downloadedFilePath = await downloadChromeDriverPackage(driverVersion, targetPath);
     console.log('Extracting driver package contents');
-    extractZip(downloadedFilePath, targetPath);
+    await new Promise((resolve, reject) =>
+        extractZip(downloadedFilePath, {dir: path.resolve(targetPath)}, error => error ? reject(error) : resolve()));
+    
     shell.rm(downloadedFilePath);
     // make sure the driver file is user executable
     const driverFilePath = path.join(targetPath, CHROME_DRIVER_NAME);

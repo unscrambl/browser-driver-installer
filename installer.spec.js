@@ -13,10 +13,7 @@ chai.use(sinonChai);
 
 describe('browserDriverInstaller', () =>
 {
-    const DEFAULT_TIMEOUT_IN_MILLIS = 60000;
     const DRIVER_OUTPUT_PATH = './output';
-
-    this.timeout(DEFAULT_TIMEOUT_IN_MILLIS);
 
     beforeEach(() =>
     {
@@ -34,11 +31,24 @@ describe('browserDriverInstaller', () =>
         shell.rm('-rf', DRIVER_OUTPUT_PATH);
     }
 
+    async function catchError(callback) {
+        let thrownError;
+        try
+        {
+            await callback();
+        }
+        catch (error)
+        {
+            thrownError = error;
+        }
+        return thrownError;
+    }
+
     it(
         'should not attempt to install anything if one of the path, the version, or both parameters are not provided',
         async () =>
         {
-            expect(await installer.browserDriverInstaller()).to.throw(
+            expect((await catchError(() => installer.browserDriverInstaller())).message).to.equal(
                 'the parameters are not valid strings');
         });
 
@@ -47,7 +57,7 @@ describe('browserDriverInstaller', () =>
         async() =>
         {
             const invalidVersion = '1';
-            expect(await installer.browserDriverInstaller('Chrome', invalidVersion, '/some/target/path')).to.throw(
+            expect((await catchError(() => installer.browserDriverInstaller('Chrome', invalidVersion, '/some/target/path'))).message).to.match(
                 /failed to locate a version of the chromedriver that matches the installed Chrome version \(1\), the valid Chrome versions are:*/
             );
         });
