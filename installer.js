@@ -29,7 +29,7 @@ function checkIfSupportedPlatform()
     }
 }
 
-function browserDriverInstaller(browserName, browserVersion, targetPath)
+async function browserDriverInstaller(browserName, browserVersion, targetPath)
 {
     if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
     {
@@ -122,7 +122,18 @@ function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
     return true;
 }
 
-function downloadChromeDriverPackage(driverVersion, targetPath)
+async function promisifyRequest(options)
+{
+    return new Promise((resolve, reject) =>
+    {
+        const requestHelper = request(options);
+        requestHelper.on('error', reject);
+        requestHelper.on('complete', (_resp, body) => resolve(body));
+    });    
+}
+
+
+async function downloadChromeDriverPackage(driverVersion, targetPath)
 {
     const downloadUrlBase = 'https://chromedriver.storage.googleapis.com';
     const driverFileName = 'chromedriver_linux64.zip';
@@ -131,54 +142,57 @@ function downloadChromeDriverPackage(driverVersion, targetPath)
     if (driverVersion.startsWith('LATEST_RELEASE_'))
     {
         const versionQueryUrl = `${downloadUrlBase}/${driverVersion}`;
-        const httpRequest = prepareHttpGetRequest(versionQueryUrl);
-        const response = request(httpRequest);
-        driverVersion = response.body;
+        const httpRequestOptions = prepareHttpGetRequest(versionQueryUrl);
+        driverVersion = await promisifyRequest(versionQueryUrl, httpRequestOptions);
     }
 
     const downloadUrl = `${downloadUrlBase}/${driverVersion}/${driverFileName}`;
-    downloadFile(downloadUrl, downloadedFilePath);
+    await downloadFile(downloadUrl, downloadedFilePath);
     return downloadedFilePath;
 }
 
-function downloadFile(downloadUrl, downloadedFilePath)
+async function downloadFile(downloadUrl, downloadedFilePath)
 {
-    console.log('Downloading from URL: ', downloadUrl);
-    console.log('Saving to file:', downloadedFilePath);
-    const httpRequest = prepareHttpGetRequest(downloadUrl);
-    let count = 0;
-    let notifiedCount = 0;
-    const outFile = fs.openSync(downloadedFilePath, 'w');
-    const response = request(httpRequest);
-    response.on('error', function (err)
-    {
-        fs.closeSync(outFile);
-        throw new Error('Error downloading file: ' + err);
-    });
-    response.on('data', function (data)
-    {
-        fs.writeSync(outFile, data, 0, data.length, null);
-        count += data.length;
-        if ((count - notifiedCount) > 800000)
+    return new Promise((resolve, reject) =>
+    {      
+        console.log('Downloading from URL: ', downloadUrl);
+        console.log('Saving to file:', downloadedFilePath);
+        const httpRequest = prepareHttpGetRequest(downloadUrl);
+        let count = 0;
+        let notifiedCount = 0;
+        const outFile = fs.openSync(downloadedFilePath, 'w');
+        const response = request(httpRequest);
+        response.on('error', function (err)
         {
-            console.log('Received ' + Math.floor(count / 1024) + 'K...');
-            notifiedCount = count;
-        }
-    });
-    response.on('end', function ()
-    {
-        console.log('Received ' + Math.floor(count / 1024) + 'K total.');
-        fs.closeSync(outFile);
+            fs.closeSync(outFile);
+            reject(new Error('Error downloading file: ' + err));
+        });
+        response.on('data', function (data)
+        {
+            fs.writeSync(outFile, data, 0, data.length, null);
+            count += data.length;
+            if ((count - notifiedCount) > 800000)
+            {
+                console.log('Received ' + Math.floor(count / 1024) + 'K...');
+                notifiedCount = count;
+            }
+        });
+        response.on('complete', function ()
+        {
+            console.log('Received ' + Math.floor(count / 1024) + 'K total.');
+            fs.closeSync(outFile);
+            resolve();
+        });
     });
 }
 
-function downloadGeckoDriverPackage(driverVersion, targetPath)
+async function downloadGeckoDriverPackage(driverVersion, targetPath)
 {
     const downloadUrlBase = 'https://github.com/mozilla/geckodriver/releases/download';
     const driverFileName = 'geckodriver-v' + driverVersion + '-linux64.tar.gz';
     const downloadedFilePath = path.resolve(targetPath, driverFileName);
     const downloadUrl = `${downloadUrlBase}/v${driverVersion}/${driverFileName}`;
-    downloadFile(downloadUrl, downloadedFilePath);
+    await downloadFile(downloadUrl, downloadedFilePath);
     return downloadedFilePath;
 }
 
@@ -194,7 +208,7 @@ function driverVersion(driverName, targetPath)
     return versionOutput.match(GECKO_DRIVER_VERSION_REGEX)[1];
 }
 
-function installBrowserDriver(driverName, driverVersion, targetPath)
+async function installBrowserDriver(driverName, driverVersion, targetPath)
 {
     if (doesDriverAlreadyExist(driverName, driverVersion, targetPath))
     {
@@ -206,19 +220,19 @@ function installBrowserDriver(driverName, driverVersion, targetPath)
 
     if (driverName === CHROME_DRIVER_NAME)
     {
-        installChromeDriver(driverName, driverVersion, targetPath);
+        await installChromeDriver(driverName, driverVersion, targetPath);
     }
     else
     {
-        installGeckoDriver(driverName, driverVersion, targetPath);
+        await installGeckoDriver(driverName, driverVersion, targetPath);
     }
 
     return true;
 }
 
-function installChromeDriver(driverVersion, targetPath)
+async function installChromeDriver(driverVersion, targetPath)
 {
-    const downloadedFilePath = downloadChromeDriverPackage(driverVersion, targetPath);
+    const downloadedFilePath = await downloadChromeDriverPackage(driverVersion, targetPath);
     console.log('Extracting driver package contents');
     extractZip(downloadedFilePath, targetPath);
     shell.rm(downloadedFilePath);
@@ -227,9 +241,9 @@ function installChromeDriver(driverVersion, targetPath)
     fs.chmodSync(driverFilePath, '755');
 }
 
-function installGeckoDriver(driverVersion, targetPath)
+async function installGeckoDriver(driverVersion, targetPath)
 {
-    const downloadedFilePath = downloadGeckoDriverPackage(driverVersion, targetPath);
+    const downloadedFilePath = await downloadGeckoDriverPackage(driverVersion, targetPath);
     console.log('Extracting driver package contents');
     tar.extract({ cwd: targetPath, file: downloadedFilePath, sync: true });
     shell.rm(downloadedFilePath);
