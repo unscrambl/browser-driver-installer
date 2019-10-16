@@ -31,7 +31,8 @@ describe('browserDriverInstaller', () =>
         shell.rm('-rf', DRIVER_OUTPUT_PATH);
     }
 
-    async function catchError(callback) {
+    async function catchError(callback)
+    {
         let thrownError;
         try
         {
@@ -54,10 +55,11 @@ describe('browserDriverInstaller', () =>
 
     it(
         'should throw an error if the requested version for a driver corresponding to an invalid version of a browser is not included in the JSON file',
-        async() =>
+        async () =>
         {
             const invalidVersion = '1';
-            expect((await catchError(() => installer.browserDriverInstaller('Chrome', invalidVersion, '/some/target/path'))).message).to.match(
+            expect((await catchError(() => installer.browserDriverInstaller('Chrome', invalidVersion,
+                '/some/target/path'))).message).to.match(
                 /failed to locate a version of the chromedriver that matches the installed Chrome version \(1\), the valid Chrome versions are:*/
             );
         });

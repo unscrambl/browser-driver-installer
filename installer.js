@@ -18,17 +18,6 @@ const GECKO_DRIVER_VERSION_REGEX = new RegExp(/\w+\s(\d+.\d+.\d+)/);
 const FIREFOX_BROWSER_NAME = 'firefox';
 const VALID_BROWSER_NAMES = [CHROME_BROWSER_NAME, FIREFOX_BROWSER_NAME];
 
-function checkIfSupportedPlatform()
-{
-    let arch = process.arch;
-    let platform = process.platform;
-
-    if (platform !== 'linux' || arch !== 'x64')
-    {
-        throw new Error(`Unsupported platform/architecture: ${platform} ${arch}. Only Linux x64 systems are supported`);
-    }
-}
-
 async function browserDriverInstaller(browserName, browserVersion, targetPath)
 {
     if (typeof browserName !== 'string' || typeof browserVersion !== 'string' || typeof targetPath !== 'string')
@@ -87,6 +76,17 @@ async function browserDriverInstaller(browserName, browserVersion, targetPath)
     return await installBrowserDriver(driverName, driverVersion, targetPath);
 }
 
+function checkIfSupportedPlatform()
+{
+    let arch = process.arch;
+    let platform = process.platform;
+
+    if (platform !== 'linux' || arch !== 'x64')
+    {
+        throw new Error(`Unsupported platform/architecture: ${platform} ${arch}. Only Linux x64 systems are supported`);
+    }
+}
+
 function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
 {
     targetPath = path.resolve(targetPath);
@@ -122,28 +122,22 @@ function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
     return true;
 }
 
-async function promisifyRequest(options)
-{
-    return new Promise((resolve, reject) =>
-    {
-        const requestHelper = request(options);
-        requestHelper.on('error', reject);
-        requestHelper.on('complete', (_resp, body) => resolve(body));
-    });    
-}
-
-
 async function downloadChromeDriverPackage(driverVersion, targetPath)
 {
     const downloadUrlBase = 'https://chromedriver.storage.googleapis.com';
     const driverFileName = 'chromedriver_linux64.zip';
     const downloadedFilePath = path.resolve(targetPath, driverFileName);
-   
+
     if (driverVersion.startsWith('LATEST_RELEASE_'))
     {
         const versionQueryUrl = `${downloadUrlBase}/${driverVersion}`;
         const httpRequestOptions = prepareHttpGetRequest(versionQueryUrl);
-        driverVersion = await promisifyRequest(versionQueryUrl, httpRequestOptions);
+        driverVersion = await new Promise((resolve, reject) =>
+        {
+            const requestHelper = request(httpRequestOptions);
+            requestHelper.on('error', reject);
+            requestHelper.on('complete', (_resp, body) => resolve(body));
+        });
     }
 
     const downloadUrl = `${downloadUrlBase}/${driverVersion}/${driverFileName}`;
@@ -154,7 +148,7 @@ async function downloadChromeDriverPackage(driverVersion, targetPath)
 async function downloadFile(downloadUrl, downloadedFilePath)
 {
     return new Promise((resolve, reject) =>
-    {      
+    {
         console.log('Downloading from URL: ', downloadUrl);
         console.log('Saving to file:', downloadedFilePath);
         const httpRequest = prepareHttpGetRequest(downloadUrl);
@@ -235,8 +229,8 @@ async function installChromeDriver(driverVersion, targetPath)
     const downloadedFilePath = await downloadChromeDriverPackage(driverVersion, targetPath);
     console.log('Extracting driver package contents');
     await new Promise((resolve, reject) =>
-        extractZip(downloadedFilePath, {dir: path.resolve(targetPath)}, error => error ? reject(error) : resolve()));
-    
+        extractZip(downloadedFilePath, { dir: path.resolve(targetPath) }, error => error ? reject(error) : resolve())
+    );
     shell.rm(downloadedFilePath);
     // make sure the driver file is user executable
     const driverFilePath = path.join(targetPath, CHROME_DRIVER_NAME);
