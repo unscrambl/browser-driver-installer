@@ -134,9 +134,11 @@ async function downloadChromeDriverPackage(driverVersion, targetPath)
         const httpRequestOptions = prepareHttpGetRequest(versionQueryUrl);
         driverVersion = await new Promise((resolve, reject) =>
         {
-            const requestHelper = request(httpRequestOptions);
-            requestHelper.on('error', reject);
-            requestHelper.on('complete', (_resp, body) => resolve(body));
+            request(httpRequestOptions, (error, _response, body) =>
+            {
+                if (error) { return reject(error); }
+                resolve(body);
+            });
         });
     }
 
@@ -151,11 +153,11 @@ async function downloadFile(downloadUrl, downloadedFilePath)
     {
         console.log('Downloading from URL: ', downloadUrl);
         console.log('Saving to file:', downloadedFilePath);
-        const httpRequest = prepareHttpGetRequest(downloadUrl);
+        const httpRequestOptions = prepareHttpGetRequest(downloadUrl);
         let count = 0;
         let notifiedCount = 0;
         const outFile = fs.openSync(downloadedFilePath, 'w');
-        const response = request(httpRequest);
+        const response = request(httpRequestOptions);
         response.on('error', function (err)
         {
             fs.closeSync(outFile);

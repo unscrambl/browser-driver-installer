@@ -76,14 +76,32 @@ describe('browserDriverInstaller', () =>
         'should install the \'geckodriver\' driver in the specified path if the version is included in the JSON file',
         async () =>
         {
-            await installer.browserDriverInstaller('Firefox', '62', DRIVER_OUTPUT_PATH);
+            await installer.browserDriverInstaller('Firefox', '58', DRIVER_OUTPUT_PATH);
+            expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'geckodriver'))).to.be.true;
+        });
+
+    it(
+        'should install the \'chromedriver\' driver in the specified path if the version is greater than the max version in the JSON',
+        async () =>
+        {
+            await installer.browserDriverInstaller('Chrome', '75', DRIVER_OUTPUT_PATH);
+            expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'chromedriver'))).to.be.true;
+        });
+
+    it(
+        'should install the \'geckodriver\' driver in the specified path if the version is greater than the max version in the JSON',
+        async () =>
+        {
+            await installer.browserDriverInstaller('Firefox', '65', DRIVER_OUTPUT_PATH);
             expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'geckodriver'))).to.be.true;
         });
 
     it('should not install a driver again if its expected version is already installed',
         async () =>
         {
-            await installer.browserDriverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH);
-            expect(installer.browserDriverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH)).to.be.false;
+            let result = await installer.browserDriverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH);
+            expect(result).to.be.true;
+            result = await installer.browserDriverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH);
+            expect(result).to.be.false;
         });
 });
