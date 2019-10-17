@@ -94,9 +94,16 @@ function checkIfSupportedPlatform()
 
 function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
 {
+    // in the case of Chrome/chromedriver, when we query the latest version of chromedriver that matches a specific 
+    // Chrome version (say 77, greater than the last one in the browserVersion2DriverVersion.json, > 72), 
+    // driverExpectedVersion will be LATEST_RELEASE_77 and so the actual driverExpectedVersion should be 77.X (e.g. 
+    // 77.0.3865.40) so we don't know what X is, thus we match only the initial 'release' part which is 77 (up to the 
+    // first dot)
+    let matchReleaseOnly = false;
     if (driverExpectedVersion.startsWith(CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX))
     {
         driverExpectedVersion = driverExpectedVersion.replace(CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX, '');
+        matchReleaseOnly = true;
     }
 
     targetPath = path.resolve(targetPath);
@@ -116,7 +123,13 @@ function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
 
     console.log(`the '${driverName}' driver was found in the '${targetPath}' installation directory`);
     const driverVersion_ = driverVersion(driverName, targetPath);
-    if (driverVersion_ !== driverExpectedVersion)
+    if (driverVersion_ === driverExpectedVersion ||
+        matchReleaseOnly && driverVersion_.split('.')[0] === driverExpectedVersion)
+    {
+        console.log(`the expected version (${driverExpectedVersion}) for the '${driverName}' is already installed`);
+        return true;
+    }
+    else
     {
         console.log(
             `the expected version (${driverExpectedVersion}) for the '${driverName}' driver does not match the ` +
@@ -125,10 +138,6 @@ function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
         shell.rm('-rf', path.join(targetPath, driverName));
         return false;
     }
-
-    console.log(`the expected version (${driverExpectedVersion}) for the '${driverName}' is already installed`);
-
-    return true;
 }
 
 async function downloadChromeDriverPackage(driverVersion, targetPath)
