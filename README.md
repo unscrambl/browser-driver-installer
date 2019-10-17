@@ -3,15 +3,13 @@
 # browser-driver-installer
 Installs the Chrome and Gecko drivers that match with the specified browser versions.
 
-It uses the [chromedriver](https://www.npmjs.com/package/chromedriver) and [geckodriver](https://www.npmjs.com/package/geckodriver) NPM packages to download the drivers.
-
 #### Usage:
 
 **Post Install Script:** If your environment has the `BROWSER_DRIVER_INSTALLER_CHROME_VERSION`, `BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH`, `BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION`, `BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH` variables defined, a post-install script will download the `ChromeDriver` and `GeckoDriver` executables to the specified paths automatically.
 
 If you want to, you can call the post-install script *without* the installation with `npx`:
 ```
-npx --package browser-driver-installer checkEnvironmentAndInstall
+npx --package browser-driver-installer installBrowserDrivers
 ```
 
 **As a module:**

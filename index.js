@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const program = require('commander');
-const driverInstaller = require('./installer').driverInstaller;
+const browserDriverInstaller = require('./installer').browserDriverInstaller;
 
 if (require.main === module)
 {
@@ -11,9 +11,9 @@ if (require.main === module)
         .option('--target-path <target-path>', 'Sets the target path to install the driver executable')
         .parse(process.argv);
 
-    driverInstaller(program.browserName, program.browserVersion, program.targetPath);
+    browserDriverInstaller(program.browserName, program.browserVersion, program.targetPath);
 }
 else
 {
-    module.exports.driverInstaller = driverInstaller;
+    module.exports.browserDriverInstaller = browserDriverInstaller;
 }
