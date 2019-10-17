@@ -14,8 +14,8 @@ npx --package browser-driver-installer installBrowserDrivers
 
 **As a module:**
 ```
-const driverInstaller = require('browser-driver-installer').driverInstaller;
-driverInstaller(BROWSER_NAME, BROWSER_VERSION, TARGET_PATH);
+const browserDriverInstaller = require('browser-driver-installer').browserDriverInstaller;
+browserDriverInstaller(BROWSER_NAME, BROWSER_VERSION, TARGET_PATH);
 ```
 
 
