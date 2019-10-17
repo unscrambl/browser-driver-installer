@@ -54,14 +54,18 @@ describe('browserDriverInstaller', () =>
         });
 
     it(
-        'should throw an error if the requested version for a driver corresponding to an invalid version of a browser is not included in the JSON file',
+        'should throw an error if the requested version for a driver corresponding to an invalid version of a ' +
+        'browser is not included in the JSON file',
         async () =>
         {
             const invalidVersion = '1';
-            expect((await catchError(() => installer.browserDriverInstaller('Chrome', invalidVersion,
-                '/some/target/path'))).message).to.match(
-                /failed to locate a version of the chromedriver that matches the installed Chrome version \(1\), the valid Chrome versions are:*/
-            );
+            expect((
+                    await catchError(() => installer.browserDriverInstaller('Chrome', invalidVersion,
+                        '/some/target/path')))
+                .message).to.match(
+                new RegExp(
+                    'failed to locate a version of the chromedriver that matches the installed Chrome version ' +
+                    '\\(1\\), the valid Chrome versions are:*'));
         });
 
     it(
@@ -81,7 +85,8 @@ describe('browserDriverInstaller', () =>
         });
 
     it(
-        'should install the \'chromedriver\' driver in the specified path if the version is greater than the max version in the JSON',
+        'should install the \'chromedriver\' driver in the specified path if the version is greater than the max ' +
+        'version in the JSON',
         async () =>
         {
             await installer.browserDriverInstaller('Chrome', '75', DRIVER_OUTPUT_PATH);
@@ -89,14 +94,16 @@ describe('browserDriverInstaller', () =>
         });
 
     it(
-        'should install the \'geckodriver\' driver in the specified path if the version is greater than the max version in the JSON',
+        'should install the \'geckodriver\' driver in the specified path if the version is greater than the max ' +
+        'version in the JSON',
         async () =>
         {
             await installer.browserDriverInstaller('Firefox', '65', DRIVER_OUTPUT_PATH);
             expect(shell.test('-e', path.resolve(DRIVER_OUTPUT_PATH, 'geckodriver'))).to.be.true;
         });
 
-    it('should not install a driver again if its expected version is already installed',
+    it(
+        'should not install a driver again if its expected version is already installed',
         async () =>
         {
             let result = await installer.browserDriverInstaller('Chrome', '70', DRIVER_OUTPUT_PATH);

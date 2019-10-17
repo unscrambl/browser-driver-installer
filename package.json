@@ -1,6 +1,7 @@
 {
     "author": "Unscrambl",
     "bin": {
+        "checkEnvironmentAndInstall": "./install_browser_drivers",
         "installBrowserDrivers": "./install_browser_drivers"
     },
     "dependencies": {
@@ -22,7 +23,6 @@
     "name": "browser-driver-installer",
     "repository": "github:unscrambl/browser-driver-installer",
     "scripts": {
-        "postinstall": "./install_browser_drivers",
         "test": "node_modules/mocha/bin/mocha *.spec.js --timeout 60000"
     },
     "version": "2.0.0"

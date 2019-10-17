@@ -57,18 +57,22 @@ async function browserDriverInstaller(browserName, browserVersion, targetPath)
     {
         if (browserNameLowerCase === CHROME_BROWSER_NAME && Number(browserVersion) > 72)
         {
-            // Refer to https://chromedriver.chromium.org/downloads for version compatibility between chromedriver and Chrome
+            // Refer to https://chromedriver.chromium.org/downloads for version compatibility between chromedriver 
+            // and Chrome
             driverVersion = 'LATEST_RELEASE_' + browserVersion;
         }
         else if (browserNameLowerCase === FIREFOX_BROWSER_NAME && Number(browserVersion) > 60)
         {
-            // Refer to https://firefox-source-docs.mozilla.org/testing/geckodriver/Support.html for version compatibility between geckodriver and Firefox
+            // Refer to https://firefox-source-docs.mozilla.org/testing/geckodriver/Support.html for version 
+            // compatibility between geckodriver and Firefox
             driverVersion = browserVersion2DriverVersion['60'];
         }
         else
         {
             throw new Error(
-                `failed to locate a version of the ${driverName} that matches the installed ${browserName} version (${browserVersion}), the valid ${browserName} versions are: ${Object.keys(browserVersion2DriverVersion).join(', ')}`
+                `failed to locate a version of the ${driverName} that matches the installed ${browserName} version ` +
+                `(${browserVersion}), the valid ${browserName} versions are: ` +
+                `${Object.keys(browserVersion2DriverVersion).join(', ')}`
             );
         }
     }
@@ -105,19 +109,18 @@ function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
     }
 
     console.log(`the '${driverName}' driver was found in the '${targetPath}' installation directory`);
-    const driverMajorVersion = driverVersion(driverName, targetPath);
-    if (driverMajorVersion !== driverExpectedVersion)
+    const driverVersion_ = driverVersion(driverName, targetPath);
+    if (driverVersion_ !== driverExpectedVersion)
     {
         console.log(
-            `the expected version (${driverExpectedVersion}) for the '${driverName}' driver does not match the installed one (${driverMajorVersion}), removing the old version`
+            `the expected version (${driverExpectedVersion}) for the '${driverName}' driver does not match the ` +
+            `installed one (${driverVersion_}), removing the old version`
         );
         shell.rm('-rf', path.join(targetPath, driverName));
         return false;
     }
 
-    console.log(
-        `the expected version (${driverExpectedVersion}) for the '${driverName}' driver had been previously installed`
-    );
+    console.log(`the expected version (${driverExpectedVersion}) for the '${driverName}' is already installed`);
 
     return true;
 }
@@ -256,7 +259,8 @@ function majorBrowserVersion(browserVersionString)
     if (browserVersionStringType !== 'string')
     {
         throw new Error(
-            `invalid type for the 'browserVersionString' argument, details: expected a string, found ${browserVersionStringType}`
+            'invalid type for the \'browserVersionString\' argument, details: expected a string, found ' +
+            `${browserVersionStringType}`
         );
     }
     let matches = browserVersionString.match(BROWSER_MAJOR_VERSION_REGEX);
