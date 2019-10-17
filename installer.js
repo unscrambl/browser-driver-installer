@@ -10,6 +10,7 @@ const shell = require('shelljs');
 const tar = require('tar');
 
 const BROWSER_MAJOR_VERSION_REGEX = new RegExp(/^(\d+)/);
+const CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX = 'LATEST_RELEASE_';
 const CHROME_BROWSER_NAME = 'chrome';
 const CHROME_DRIVER_NAME = 'chromedriver';
 const CHROME_DRIVER_VERSION_REGEX = new RegExp(/\w+ ([0-9]+.[0-9]+).+/);
@@ -59,7 +60,7 @@ async function browserDriverInstaller(browserName, browserVersion, targetPath)
         {
             // Refer to https://chromedriver.chromium.org/downloads for version compatibility between chromedriver 
             // and Chrome
-            driverVersion = 'LATEST_RELEASE_' + browserVersion;
+            driverVersion = CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX + browserVersion;
         }
         else if (browserNameLowerCase === FIREFOX_BROWSER_NAME && Number(browserVersion) > 60)
         {
@@ -93,6 +94,11 @@ function checkIfSupportedPlatform()
 
 function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
 {
+    if (driverExpectedVersion.startsWith(CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX))
+    {
+        driverExpectedVersion = driverExpectedVersion.replace(CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX, '');
+    }
+
     targetPath = path.resolve(targetPath);
     console.log(`checking if the '${targetPath}' installation directory for the '${driverName}' driver exists`);
     if (!shell.test('-e', targetPath))
@@ -131,7 +137,7 @@ async function downloadChromeDriverPackage(driverVersion, targetPath)
     const driverFileName = 'chromedriver_linux64.zip';
     const downloadedFilePath = path.resolve(targetPath, driverFileName);
 
-    if (driverVersion.startsWith('LATEST_RELEASE_'))
+    if (driverVersion.startsWith(CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX))
     {
         const versionQueryUrl = `${downloadUrlBase}/${driverVersion}`;
         const httpRequestOptions = prepareHttpGetRequest(versionQueryUrl);
