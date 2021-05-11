@@ -5,19 +5,19 @@
         "installBrowserDrivers": "./install_browser_drivers"
     },
     "dependencies": {
-        "commander": "^3.0.2",
-        "extract-zip": "^1.6.7",
-        "request": "^2.88.0",
-        "shelljs": "^0.8.3",
-        "tar": "^5.0.5"
-    },
-    "devDependencies": {
-        "chai": "^4.2.0",
-        "mocha": "^6.2.1",
-        "sinon": "^7.5.0",
-        "sinon-chai": "^3.3.0"
+        "commander": "^7.2.0",
+        "extract-zip": "  ^2.0.1",
+        "request": "^2.88.2",
+        "shelljs": "^0.8.4",
+        "tar": "^6.1.0"
     },
     "description": "Installs Chrome and Gecko drivers that matches with the specified browser versions",
+    "devDependencies": {
+        "chai": "^4.3.4",
+        "mocha": "^8.4.0",
+        "sinon": "^10.0.0",
+        "sinon-chai": "^3.6.0"
+    },
     "license": "Apache-2.0",
     "main": "index.js",
     "name": "browser-driver-installer",
@@ -25,5 +25,5 @@
     "scripts": {
         "test": "node_modules/mocha/bin/mocha *.spec.js --timeout 60000"
     },
-    "version": "2.0.3"
+    "version": "2.1.0"
 }
