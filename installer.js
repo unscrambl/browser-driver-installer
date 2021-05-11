@@ -58,13 +58,13 @@ async function browserDriverInstaller(browserName, browserVersion, targetPath)
     {
         if (browserNameLowerCase === CHROME_BROWSER_NAME && Number(browserVersion) > 72)
         {
-            // Refer to https://chromedriver.chromium.org/downloads for version compatibility between chromedriver 
+            // Refer to https://chromedriver.chromium.org/downloads for version compatibility between chromedriver
             // and Chrome
             driverVersion = CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX + browserVersion;
         }
         else if (browserNameLowerCase === FIREFOX_BROWSER_NAME && Number(browserVersion) > 60)
         {
-            // Refer to https://firefox-source-docs.mozilla.org/testing/geckodriver/Support.html for version 
+            // Refer to https://firefox-source-docs.mozilla.org/testing/geckodriver/Support.html for version
             // compatibility between geckodriver and Firefox
             driverVersion = browserVersion2DriverVersion['60'];
         }
@@ -94,10 +94,10 @@ function checkIfSupportedPlatform()
 
 function doesDriverAlreadyExist(driverName, driverExpectedVersion, targetPath)
 {
-    // in the case of Chrome/chromedriver, when we query the latest version of chromedriver that matches a specific 
-    // Chrome version (say 77, greater than the last one in the browserVersion2DriverVersion.json, > 72), 
-    // driverExpectedVersion will be LATEST_RELEASE_77 and so the actual driverExpectedVersion should be 77.X (e.g. 
-    // 77.0.3865.40) so we don't know what X is, thus we match only the initial 'release' part which is 77 (up to the 
+    // in the case of Chrome/chromedriver, when we query the latest version of chromedriver that matches a specific
+    // Chrome version (say 77, greater than the last one in the browserVersion2DriverVersion.json, > 72),
+    // driverExpectedVersion will be LATEST_RELEASE_77 and so the actual driverExpectedVersion should be 77.X (e.g.
+    // 77.0.3865.40) so we don't know what X is, thus we match only the initial 'release' part which is 77 (up to the
     // first dot)
     let matchReleaseOnly = false;
     if (driverExpectedVersion.startsWith(CHROME_DRIVER_LATEST_RELEASE_VERSION_PREFIX))
@@ -248,9 +248,7 @@ async function installChromeDriver(driverVersion, targetPath)
 {
     const downloadedFilePath = await downloadChromeDriverPackage(driverVersion, targetPath);
     console.log('Extracting driver package contents');
-    await new Promise((resolve, reject) =>
-        extractZip(downloadedFilePath, { dir: path.resolve(targetPath) }, error => error ? reject(error) : resolve())
-    );
+    await extractZip(downloadedFilePath, { dir: path.resolve(targetPath) });
     shell.rm(downloadedFilePath);
     // make sure the driver file is user executable
     const driverFilePath = path.join(targetPath, CHROME_DRIVER_NAME);
