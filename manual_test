@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+browser_drivers_install_path=/tmp/browser_drivers
+rm -fr ${browser_drivers_install_path}
+mkdir ${browser_drivers_install_path}
+
+
+export BROWSER_DRIVER_INSTALLER_CHROME_VERSION=90
+export BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION=78
+
+export BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH=${browser_drivers_install_path}
+export BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH=${browser_drivers_install_path}
+
+./install_browser_drivers
