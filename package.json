@@ -6,10 +6,10 @@
     },
     "dependencies": {
         "commander": "^7.2.0",
-        "extract-zip": "  ^2.0.1",
+        "extract-zip": "^2.0.1",
         "request": "^2.88.2",
         "shelljs": "^0.8.4",
-        "tar": "^6.1.0"
+        "tar": "^6.1.9"
     },
     "description": "Installs Chrome and Gecko drivers that matches with the specified browser versions",
     "devDependencies": {
@@ -25,5 +25,5 @@
     "scripts": {
         "test": "node_modules/mocha/bin/mocha *.spec.js --timeout 60000"
     },
-    "version": "2.1.2"
+    "version": "2.1.3"
 }
