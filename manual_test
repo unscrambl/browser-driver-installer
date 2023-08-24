@@ -1,14 +1,30 @@
 #!/usr/bin/env bash
 
 browser_drivers_install_path=/tmp/browser_drivers
-rm -fr ${browser_drivers_install_path}
-mkdir ${browser_drivers_install_path}
-
-
-export BROWSER_DRIVER_INSTALLER_CHROME_VERSION=90
-export BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION=78
 
 export BROWSER_DRIVER_INSTALLER_CHROMEDRIVER_PATH=${browser_drivers_install_path}
 export BROWSER_DRIVER_INSTALLER_GECKODRIVER_PATH=${browser_drivers_install_path}
 
+export BROWSER_DRIVER_INSTALLER_CHROME_VERSION=70
+export BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION=60
+rm -fr ${browser_drivers_install_path}
+mkdir ${browser_drivers_install_path}
+./install_browser_drivers
+# one more time to check if it skips download when the drivers already exits
+./install_browser_drivers
+
+
+export BROWSER_DRIVER_INSTALLER_CHROME_VERSION=114.0.5735.90
+export BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION=75
+./install_browser_drivers
+# one more time to check if it skips download when the drivers already exits
+./install_browser_drivers
+
+
+export BROWSER_DRIVER_INSTALLER_CHROME_VERSION=115.0.5790.102
+export BROWSER_DRIVER_INSTALLER_FIREFOX_VERSION=80
+rm -fr ${browser_drivers_install_path}
+mkdir ${browser_drivers_install_path}
+./install_browser_drivers
+# one more time to check if it skips download when the drivers already exits
 ./install_browser_drivers
